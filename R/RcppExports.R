@@ -2,18 +2,18 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 rcpparma_hello_world <- function() {
-    .Call(`_LSVCMM_rcpparma_hello_world`)
+    .Call('_LSVCMM_rcpparma_hello_world', PACKAGE = 'LSVCMM')
 }
 
 rcpparma_outerproduct <- function(x) {
-    .Call(`_LSVCMM_rcpparma_outerproduct`, x)
+    .Call('_LSVCMM_rcpparma_outerproduct', PACKAGE = 'LSVCMM', x)
 }
 
 rcpparma_innerproduct <- function(x) {
-    .Call(`_LSVCMM_rcpparma_innerproduct`, x)
+    .Call('_LSVCMM_rcpparma_innerproduct', PACKAGE = 'LSVCMM', x)
 }
 
 rcpparma_bothproducts <- function(x) {
-    .Call(`_LSVCMM_rcpparma_bothproducts`, x)
+    .Call('_LSVCMM_rcpparma_bothproducts', PACKAGE = 'LSVCMM', x)
 }
 
