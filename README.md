@@ -1,11 +1,13 @@
-<h4> ¶ README updated: <i>Jul-15-2023</i> ¶ </h4>
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
+
+Last updated: *Jul-15-2023*
 
 # LSVCMM
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/fontaine618/LSVCMM/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/fontaine618/LSVCMM/actions/workflows/R-CMD-check.yaml)
+[![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/LSVCMM)](https://cran.r-project.org/package=LSVCMM)
 <!-- badges: end -->
 
 The goal of LSVCMM is to …
