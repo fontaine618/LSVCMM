@@ -1,12 +1,16 @@
 Package: LSVCMM
 Type: Package
 Title: Locally Sparse Varying Coefficients Mixed Model
-Version: 0.0.0.9000
+Version: 0.0.0.9001
 Date: 2023-07-15
 Maintainer: Simon Fontaine <simfont@umich.edu>
 Description: More about what it does (maybe more than one line)
 License: MIT + file LICENSE
-Imports: Rcpp (>= 1.0.11)
+Imports: 
+    dplyr,
+    magrittr,
+    mvtnorm,
+    Rcpp (>= 1.0.11)
 LinkingTo: Rcpp, RcppArmadillo
 Authors@R: 
     person("Simon", "Fontaine", , "simfont@umich.edu", role = c("aut", "cre"))

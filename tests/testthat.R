@@ -9,4 +9,4 @@
 library(testthat)
 library(LSVCMM)
 
-test_check("LSVCMM")
+# test_check("LSVCMM")

@@ -1,0 +1,65 @@
+#include "RcppArmadillo.h"
+
+//[[Rcpp::depends(RcppArmadillo)]]
+
+#ifndef WorkingCovariance_hpp
+#define WorkingCovariance_hpp
+
+class WorkingCovariance{
+
+public:
+
+  bool estimate_parameters = FALSE;
+  WorkingCovariance();
+
+  arma::mat compute_covariance(const arma::colvec &time);
+  std::vector<arma::mat> compute_covariance(const std::vector<arma::colvec> &time);
+
+  arma::mat compute_precision(const arma::colvec &time);
+  std::vector<arma::mat> compute_precision(const std::vector<arma::colvec> &time);
+
+  void update_parameters(const std::vector<arma::colvec> &r);
+
+  void add_to_results(Rcpp::List& results);
+
+};
+
+class Independence : public WorkingCovariance{};
+
+class CompoundSymmetry : public WorkingCovariance{
+
+public:
+
+  double variance_ratio = 1.0;
+  bool estimate_parameters = TRUE;
+
+  CompoundSymmetry();
+  CompoundSymmetry(double variance_ratio, bool estimate_parameters);
+
+  using WorkingCovariance::compute_covariance;
+  arma::mat compute_covariance(const arma::colvec &time);
+
+  using WorkingCovariance::compute_precision;
+  arma::mat compute_precision(const arma::colvec &time);
+
+  void update_parameters(
+      const std::vector<arma::colvec> &sr,
+      const std::vector<arma::colvec> &t,
+      const std::vector<arma::mat> &P
+  );
+
+  double profile_likelihood(
+      const std::vector<arma::colvec> &sr,
+      const std::vector<arma::mat> &P
+  );
+
+  std::vector<double> derivatives(
+      const std::vector<arma::colvec> &sr,
+      const std::vector<arma::mat> &P
+  );
+
+  void add_to_results(Rcpp::List& results);
+
+};
+
+#endif
