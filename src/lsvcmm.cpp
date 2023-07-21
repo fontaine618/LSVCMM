@@ -15,23 +15,22 @@
 // '@export
 // [[Rcpp::export()]]
 Rcpp::List LSVCMM(
-    arma::colvec response, // DATA
-    arma::ucolvec subject,
-    arma::colvec response_time,
-    arma::mat vcm_covariates,
-    arma::mat fixed_covariates,
-    arma::colvec offset,
+    arma::colvec &response, // DATA
+    arma::ucolvec &subject,
+    arma::colvec &response_time,
+    arma::mat &vcm_covariates,
+    arma::mat &fixed_covariates,
+    arma::colvec &offset,
     std::string family_name, // FAMILY
     std::string link,
     std::string kernel_name, // KERNEL
-    arma::rowvec estimated_time,
-    arma::vec kernel_scale, // if this has 0 elements, we use a grid
-    double kernel_scale_factor,
+    arma::rowvec &estimated_time,
+    arma::vec &kernel_scale,
     uint n_kernel_scale,
     bool penalize_intercept, // PENALTY
     double alpha,
     double adaptive,
-    arma::vec lambda, // if this has 0 elements, we use a grid
+    arma::vec &lambda,
     double lambda_factor,
     uint n_lambda,
     std::string working_covariance, // DEPENDENCY
@@ -53,6 +52,8 @@ Rcpp::List LSVCMM(
     fixed_covariates,
     offset
   );
+
+
   estimated_time = arma::sort(estimated_time);
   Interpolator interpolator = Interpolator(estimated_time);
   data.I = interpolator.interpolator_matrix(data.t);
@@ -82,6 +83,8 @@ Rcpp::List LSVCMM(
 
   if(control.verbose) Rcpp::Rcout << "[LSVCMM] Initializing model \n";
   Model model = Model(
+    data.px,
+    data.pu,
     estimated_time,
     penalty,
     working_cov,
@@ -95,7 +98,7 @@ Rcpp::List LSVCMM(
   if(kernel_scale.n_elem == 0){
     double range = estimated_time.max() - estimated_time.min();
     double min_gap = arma::diff(estimated_time).min();
-    kernel_scale = arma::logspace<arma::rowvec>(log10(min_gap/2.), log10(range), n_kernel_scale);
+    kernel_scale = arma::logspace<arma::colvec>(log10(min_gap/2.), log10(range), n_kernel_scale);
     kernel_scale.print();
   }
 

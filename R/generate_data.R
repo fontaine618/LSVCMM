@@ -14,8 +14,6 @@
 #' @importFrom mvtnorm rmvnorm
 #' @importFrom dplyr filter select
 #' @importFrom magrittr %>%
-#'
-#' @examples
 generate_synthetic_data = function(
     n_subjects=100,
     n_timepoints=11,

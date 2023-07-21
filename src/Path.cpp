@@ -35,7 +35,7 @@ public:
     this->lambda = arma::vec(this->n_models, arma::fill::zeros);
     this->new_kernel = arma::uvec(this->n_models, arma::fill::zeros);
     for (uint i = 0; i < kernel_scale_.n_elem; i++) {
-      this->kernel_scale.subvec(i*n_lambda, (i+1)*n_lambda-1) = kernel_scale_(i);
+      this->kernel_scale.subvec(i*n_lambda, (i+1)*n_lambda-1) = arma::vec(n_lambda, arma::fill::ones) * kernel_scale_(i);
       this->new_kernel(i*n_lambda) = 1;
     }
     this->lambda_factor = pow(lambda_factor_, 1/(n_lambda-1));
@@ -63,7 +63,7 @@ public:
     }
   }
 
-  Rcpp::List run(Data data){
+  Rcpp::List run(Data &data){
     Rcpp::List models(this->n_models);
     for(uint m=0; m<this->n_models; m++){
       // new kernel scale
@@ -78,6 +78,7 @@ public:
         this->model.update_mean(data);
         this->model.update_precision(data);
         this->model.prepare_stepsize(data);
+        this->model.penalty.unit_weights(this->model.B);
         // find largest lambda
         if(this->mode == "grid_search"){
           Rcpp::Rcout << "         Finding lambda max\n";
@@ -90,8 +91,6 @@ public:
           this->model.fit(data);
           this->model.penalty.update_weights(this->model.B);
           this->model.B.zeros();
-        }else{
-          this->model.penalty.unit_weights(this->model.B);
         }
       }
       // same kernel scale

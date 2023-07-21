@@ -58,6 +58,12 @@ files, so they display on GitHub and CRAN.
 
 ## TODO
 
+[ ] Currently debugging fit()
+  - diverges.
+[ ] Perhaps move derivative of link funtion into update mean?
+
+## BACKLOG
+
 [ ] CV?
 [ ] R wrapper
 [ ] Bootstrap

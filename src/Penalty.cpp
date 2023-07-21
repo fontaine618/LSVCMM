@@ -73,6 +73,7 @@ void Penalty::update_weights(const arma::mat &B){
 }
 
 void Penalty::unit_weights(const arma::mat &B){
+  Rcpp::Rcout << "unit weights" << std::endl;
   this->W1 = arma::mat(B.n_rows, B.n_cols, arma::fill::zeros);
   this->w2 = arma::colvec(B.n_rows, arma::fill::zeros);
 }
