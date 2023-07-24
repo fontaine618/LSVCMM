@@ -106,6 +106,13 @@ void Model::update_gradients(const Data &data){
   uint nt = this->B.n_cols;
   std::vector<arma::colvec> d = this->linkFunction.derivative(data.lp);
   for(uint i=0; i<data.N; i++){
+    if(i==0) data.P[i].print("P[i]");
+    if(i==0) data.sr[i].print("sr[i]");
+    if(i==0) data.sPsr[i].print("sPsr[i]");
+    if(i==0) data.I[i].print("I[i]");
+    if(i==0) data.W[i].print("W[i]");
+    if(i==0) data.X[i].print("X[i]");
+    if(i==0) d[i].print("d[i]");
     arma::colvec dsPsr = d[i] % data.sPsr[i];
     for(uint j=0; j<nt; j++){
       arma::vec wdsPsr = data.W[i].col(j) % dsPsr;
@@ -113,12 +120,18 @@ void Model::update_gradients(const Data &data){
     }
     if(data.pu) this->ga += data.U[i].t() * dsPsr;
   }
+  this->gB *= -1;
+  this->ga *= -1;
 }
 
 void Model::proximal_gradient_step(){
+  // this->gB.print("gB");
   this->a -= this->ga / this->La;
+  // this->B.print("B before");
   this->B -= this->gB / this->LB;
+  // this->B.print("B GD");
   this->B = this->penalty.proximal(this->B, this->LB);
+  this->B.print("B PGD");
 }
 
 void Model::initialize(Data &data){}
@@ -207,8 +220,8 @@ void Model::prepare_stepsize(Data &data){
   }
   Rcpp::Rcout << "         factor=" << factor << ", min eval=" << arma::eig_sym(LmH).min() << "\n";
 
-  this->La = La*factor;
-  this->LB = LB*factor;
+  this->La = La*factor*10;
+  this->LB = LB*factor*10;
 }
 
 double Model::lambda_max(Data &data){

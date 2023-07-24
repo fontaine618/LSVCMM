@@ -53,33 +53,49 @@ Rcpp::List LSVCMM(
     offset
   );
 
-
+  if(control.verbose) Rcpp::Rcout << "[LSVCMM] Initializing interpolator \n";
   estimated_time = arma::sort(estimated_time);
   Interpolator interpolator = Interpolator(estimated_time);
   data.I = interpolator.interpolator_matrix(data.t);
 
-  if(control.verbose) Rcpp::Rcout << "[LSVCMM] Initializing kernel \n";
-  Kernel kernel = Kernel(); // defaults to uniform
-  if(kernel_name == "gaussian") kernel = GaussianKernel();
-  data.W = kernel.eval(estimated_time, data.t);
+  if(control.verbose) Rcpp::Rcout << "[LSVCMM] Initializing kernel. kernel_name=" << kernel_name << "\n";
+  Kernel* kernel = NULL;
+  if(kernel_name == "uniform") kernel = new Kernel();
+  else if(kernel_name == "gaussian") kernel = new GaussianKernel();
+  else Rcpp::stop("Kernel not implemented");
+  Rcpp::Rcout << "         Kernel: " << typeid(kernel).name() << "\n";
+  data.W = kernel->eval(estimated_time, data.t);
 
-  if(control.verbose) Rcpp::Rcout << "[LSVCMM] Initializing family \n";
-  Family family = Family();
-  if(family_name == "gaussian") family = Gaussian();
-  LinkFunction link_function = LinkFunction();
-  if(link == "identity") link_function = Identity();
+  if(control.verbose) Rcpp::Rcout << "[LSVCMM] Initializing family. family_name=" << family_name << "\n";
+  Family* family = NULL;
+  if(family_name == "gaussian") family = new Gaussian();
+  else Rcpp::stop("Family not implemented");
+  Rcpp::Rcout << "         Family: " << typeid(family).name() << "\n";
+
+  LinkFunction* link_function = NULL;
+  if(link == "identity") link_function = new Identity();
+  else Rcpp::stop("Link function not implemented");
+  Rcpp::Rcout << "         Link function: " << typeid(link_function).name() << "\n";
+
+  // std::unique_ptr<LinkFunction> link_function = NULL;
+  // if(link == "identity") link_function.reset(new Identity());
+  // else Rcpp::stop("Link function not implemented");
+  // Rcpp::Rcout << "         Link function: " << typeid(*link_function).name() << "\n";
+
 
   if(control.verbose) Rcpp::Rcout << "[LSVCMM] Initializing penalty \n";
   Penalty penalty = Penalty(0., alpha, adaptive, penalize_intercept);
 
-  if(control.verbose) Rcpp::Rcout << "[LSVCMM] Initializing working covariance \n";
-  WorkingCovariance working_cov = WorkingCovariance();
-  if(working_covariance == "independence") working_cov = Independence();
-  if(working_covariance == "compound_symmetry") {
+  if(control.verbose) Rcpp::Rcout << "[LSVCMM] Initializing working covariance. working_covariance=" << working_covariance << "\n";
+  WorkingCovariance* working_cov = NULL;
+  if(working_covariance == "independence") working_cov = new Independence();
+  else if(working_covariance == "compound_symmetry") {
     if(!estimate_variance_components and variance_ratio < 0.) variance_ratio = log(data.n);
-    working_cov = CompoundSymmetry(variance_ratio, estimate_variance_components);
+    working_cov = new CompoundSymmetry(variance_ratio, estimate_variance_components);
   }
-  data.P = working_cov.compute_precision(data.t);
+  else Rcpp::stop("Working covariance not implemented");
+  Rcpp::Rcout << "         Working covariance: " << typeid(working_cov).name() << "\n";
+  data.P = working_cov->compute_precision(data.t);
 
   if(control.verbose) Rcpp::Rcout << "[LSVCMM] Initializing model \n";
   Model model = Model(
@@ -87,11 +103,11 @@ Rcpp::List LSVCMM(
     data.pu,
     estimated_time,
     penalty,
-    working_cov,
-    link_function,
-    family,
+    *working_cov,
+    *link_function,
+    *family,
     control,
-    kernel
+    *kernel
   );
 
   if(control.verbose) Rcpp::Rcout << "[LSVCMM] Preparing grid search \n";
