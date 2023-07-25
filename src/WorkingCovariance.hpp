@@ -5,12 +5,18 @@
 #ifndef WorkingCovariance_hpp
 #define WorkingCovariance_hpp
 
-class WorkingCovariance{
+
+class CompoundSymmetry{
 
 public:
 
-  bool estimate_parameters = FALSE;
-  WorkingCovariance();
+  double variance_ratio = 1.0;
+  bool estimate_parameters = TRUE;
+
+  // TODO: perhaps store the Z[i] in data and define a function here that computes it
+
+  CompoundSymmetry();
+  CompoundSymmetry(double variance_ratio, bool estimate_parameters);
 
   arma::mat compute_covariance(const arma::colvec &time);
   std::vector<arma::mat> compute_covariance(const std::vector<arma::colvec> &time);
@@ -18,34 +24,11 @@ public:
   arma::mat compute_precision(const arma::colvec &time);
   std::vector<arma::mat> compute_precision(const std::vector<arma::colvec> &time);
 
-  void update_parameters(const std::vector<arma::colvec> &r);
-
-  void add_to_results(Rcpp::List& results);
-
-};
-
-class Independence : public WorkingCovariance{};
-
-class CompoundSymmetry : public WorkingCovariance{
-
-public:
-
-  double variance_ratio = 1.0;
-  bool estimate_parameters = TRUE;
-
-  CompoundSymmetry();
-  CompoundSymmetry(double variance_ratio, bool estimate_parameters);
-
-  using WorkingCovariance::compute_covariance;
-  arma::mat compute_covariance(const arma::colvec &time);
-
-  using WorkingCovariance::compute_precision;
-  arma::mat compute_precision(const arma::colvec &time);
-
   void update_parameters(
       const std::vector<arma::colvec> &sr,
       const std::vector<arma::colvec> &t,
-      const std::vector<arma::mat> &P
+      const std::vector<arma::mat> &P,
+      const double dispersion
   );
 
   double profile_likelihood(
@@ -55,7 +38,8 @@ public:
 
   std::vector<double> derivatives(
       const std::vector<arma::colvec> &sr,
-      const std::vector<arma::mat> &P
+      const std::vector<arma::mat> &P,
+      const double dispersion
   );
 
   void add_to_results(Rcpp::List& results);

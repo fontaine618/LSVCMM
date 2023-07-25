@@ -11,7 +11,7 @@ class Path {
 
 public:
 
-  Model model;
+  Model* model;
   arma::vec kernel_scale;
   arma::vec lambda;
   arma::uvec new_kernel;
@@ -22,7 +22,7 @@ public:
   Path(){};
 
   Path(
-    Model model,
+    Model* model,
     arma::vec kernel_scale_,
     double lambda_factor_,
     uint n_lambda
@@ -38,11 +38,13 @@ public:
       this->kernel_scale.subvec(i*n_lambda, (i+1)*n_lambda-1) = arma::vec(n_lambda, arma::fill::ones) * kernel_scale_(i);
       this->new_kernel(i*n_lambda) = 1;
     }
-    this->lambda_factor = pow(lambda_factor_, 1/(n_lambda-1));
+    this->lambda_factor = pow(lambda_factor_, 1./(n_lambda-1.));
+    Rcpp::Rcout << "[LSVCMM] Lambda factor: " << this->lambda_factor << " lambda_factor_=" <<
+      lambda_factor_ << " n_lambda=" << n_lambda <<"\n";
   }
 
   Path(
-    Model model,
+    Model* model,
     arma::vec kernel_scale,
     arma::vec lambda
   ){
@@ -69,37 +71,39 @@ public:
       // new kernel scale
       if(this->new_kernel(m)){
         Rcpp::Rcout << "[LSVCMM] NEW KERNEL SCALE (" << this->kernel_scale(m) << ", "<< m+1 << "/" << this->n_models << ")\n";
-        this->model.a.zeros();
-        this->model.B.zeros();
-        this->model.kernel.scale = this->kernel_scale(m);
-        data.W = this->model.kernel.eval(this->model.estimated_time, data.t);
+        this->model->a.zeros();
+        this->model->B.zeros();
+        this->model->kernel->scale = this->kernel_scale(m);
+        data.W = this->model->kernel->eval(this->model->estimated_time, data.t);
         // prepare Lipschitz constants
         Rcpp::Rcout << "         Computing Lipschitz constants\n";
-        this->model.update_mean(data);
-        this->model.update_precision(data);
-        this->model.prepare_stepsize(data);
-        this->model.penalty.unit_weights(this->model.B);
+        this->model->update_mean(data);
+        this->model->update_precision(data);
+        this->model->prepare_stepsize(data);
+        this->model->penalty->unit_weights(this->model->B);
         // find largest lambda
         if(this->mode == "grid_search"){
           Rcpp::Rcout << "         Finding lambda max\n";
-          this->lambda(m) = this->model.lambda_max(data);
+          this->lambda(m) = this->model->lambda_max(data);
         }
         // compute adaptive weights
-        if(this->model.penalty.power > 0.){
+        if(this->model->penalty->power > 0.){
           Rcpp::Rcout << "         Preparing adaptive penalty weights\n";
-          this->model.penalty.lambda = 0.;
-          this->model.fit(data);
-          this->model.penalty.update_weights(this->model.B);
-          this->model.B.zeros();
+          this->model->penalty->lambda = 0.;
+          this->model->fit(data);
+          this->model->penalty->update_weights(this->model->B);
+          this->model->B.zeros();
         }
       }
       // same kernel scale
-      if(this->mode == "grid_search") this->lambda(m) = this->lambda(m-1) * this->lambda_factor;
-      this->model.penalty.lambda = this->lambda(m);
+      // this->lambda.t().print("lambda for path");
+      if(this->mode == "grid_search" and !this->new_kernel(m)) this->lambda(m) = this->lambda(m-1) * this->lambda_factor;
+      this->model->penalty->lambda = this->lambda(m);
       // run
       Rcpp::Rcout << "[LSVCMM] Fitting lambda=" << this->lambda(m) << "\n";
-      this->model.fit(data);
-      models[m] = this->model.save();
+      this->model->penalty->lambda = this->lambda(m);
+      this->model->fit(data);
+      models[m] = this->model->save();
     }
     return models;
   }

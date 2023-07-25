@@ -5,13 +5,13 @@
 #ifndef Family_hpp
 #define Family_hpp
 
-class Family{
+class Gaussian{
 
 public:
 
   double dispersion;
 
-  Family();
+  Gaussian();
 
   arma::colvec unit_variance(const arma::colvec &mean);
 
@@ -21,12 +21,6 @@ public:
 
   void add_to_results(Rcpp::List& results);
 
-};
-
-// Default is Gaussian
-class Gaussian : public Family{
-
-  void add_to_results(Rcpp::List& results);
 };
 
 #endif

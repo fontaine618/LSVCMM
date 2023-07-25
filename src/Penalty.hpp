@@ -38,10 +38,8 @@ public:
 
   void add_to_results(Rcpp::List& results);
 
-  double lambda_max(const arma::mat &gB);
+  double lambda_max(arma::mat B, const arma::mat &gB, const double stepsize);
 
 };
-
-class AdaptiveSparseGroupLasso : public Penalty{};
 
 #endif

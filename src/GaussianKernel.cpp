@@ -19,6 +19,18 @@ arma::mat GaussianKernel::eval(const arma::rowvec &t0, const arma::colvec &t1){
   return od;
 }
 
+std::vector<arma::mat> GaussianKernel::eval(const std::vector<arma::rowvec> &t0, const arma::colvec &t1){
+  std::vector<arma::mat> out(t0.size());
+  for(uint i=0; i<t0.size(); i++) out[i] = this->eval(t0[i], t1);
+  return out;
+}
+
+std::vector<arma::mat> GaussianKernel::eval(const arma::rowvec &t0, const std::vector<arma::colvec> &t1){
+  std::vector<arma::mat> out(t1.size());
+  for(uint i=0; i<t1.size(); i++) out[i] = this->eval(t0, t1[i]);
+  return out;
+}
+
 void GaussianKernel::add_to_results(Rcpp::List& results){
   results["kernel.name"] = "gaussian";
   results["kernel.scale"] = this->scale;

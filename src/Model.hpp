@@ -1,6 +1,6 @@
 #include "RcppArmadillo.h"
 #include "Data.hpp"
-#include "Kernel.hpp"
+#include "GaussianKernel.hpp"
 #include "LinkFunction.cpp"
 #include "Family.hpp"
 #include "WorkingCovariance.hpp"
@@ -31,11 +31,11 @@ public:
 
   Rcpp::List results = Rcpp::List::create();
 
-  Kernel kernel;
-  Penalty penalty;
-  WorkingCovariance workingCovariance;
-  LinkFunction linkFunction;
-  Family family;
+  GaussianKernel *kernel;
+  Penalty *penalty;
+  CompoundSymmetry *workingCovariance;
+  Identity *linkFunction;
+  Gaussian *family;
   Control control;
   arma::rowvec estimated_time;
   uint nt;
@@ -45,12 +45,12 @@ public:
     uint px,
     uint pu,
     arma::rowvec estimated_time,
-    Penalty penalty,
-    WorkingCovariance workingCovariance,
-    LinkFunction linkFunction,
-    Family family,
-    Control control,
-    Kernel kernel
+    Penalty* penalty,
+    CompoundSymmetry* workingCovariance,
+    Identity* linkFunction,
+    Gaussian* family,
+    GaussianKernel* kernel,
+    Control control
   );
 
   std::vector<arma::colvec> linear_predictor(Data &data); // linear predictor for each observation

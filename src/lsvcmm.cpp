@@ -1,6 +1,5 @@
 #include "RcppArmadillo.h"
 #include "Data.hpp"
-#include "Kernel.hpp"
 #include "GaussianKernel.hpp"
 #include "LinkFunction.cpp"
 #include "Family.hpp"
@@ -59,23 +58,26 @@ Rcpp::List LSVCMM(
   data.I = interpolator.interpolator_matrix(data.t);
 
   if(control.verbose) Rcpp::Rcout << "[LSVCMM] Initializing kernel. kernel_name=" << kernel_name << "\n";
-  Kernel* kernel = NULL;
-  if(kernel_name == "uniform") kernel = new Kernel();
-  else if(kernel_name == "gaussian") kernel = new GaussianKernel();
-  else Rcpp::stop("Kernel not implemented");
-  Rcpp::Rcout << "         Kernel: " << typeid(kernel).name() << "\n";
-  data.W = kernel->eval(estimated_time, data.t);
+  // Kernel* kernel = NULL;
+  // if(kernel_name == "uniform") kernel = new Kernel();
+  // else if(kernel_name == "gaussian") kernel = new GaussianKernel();
+  // else Rcpp::stop("Kernel not implemented");
+  // Rcpp::Rcout << "         Kernel: " << typeid(kernel).name() << "\n";
+  // data.W = kernel->eval(estimated_time, data.t);
+  GaussianKernel* kernel = new GaussianKernel();
 
   if(control.verbose) Rcpp::Rcout << "[LSVCMM] Initializing family. family_name=" << family_name << "\n";
-  Family* family = NULL;
-  if(family_name == "gaussian") family = new Gaussian();
-  else Rcpp::stop("Family not implemented");
-  Rcpp::Rcout << "         Family: " << typeid(family).name() << "\n";
+  // Family* family = NULL;
+  // if(family_name == "gaussian") family = new Gaussian();
+  // else Rcpp::stop("Family not implemented");
+  // Rcpp::Rcout << "         Family: " << typeid(family).name() << "\n";
+  Gaussian* family = new Gaussian();
 
-  LinkFunction* link_function = NULL;
-  if(link == "identity") link_function = new Identity();
-  else Rcpp::stop("Link function not implemented");
-  Rcpp::Rcout << "         Link function: " << typeid(link_function).name() << "\n";
+  // LinkFunction* link_function = NULL;
+  // if(link == "identity") link_function = new Identity();
+  // else Rcpp::stop("Link function not implemented");
+  // Rcpp::Rcout << "         Link function: " << typeid(link_function).name() << "\n";
+  Identity* link_function = new Identity();
 
   // std::unique_ptr<LinkFunction> link_function = NULL;
   // if(link == "identity") link_function.reset(new Identity());
@@ -84,37 +86,39 @@ Rcpp::List LSVCMM(
 
 
   if(control.verbose) Rcpp::Rcout << "[LSVCMM] Initializing penalty \n";
-  Penalty penalty = Penalty(0., alpha, adaptive, penalize_intercept);
+  Penalty *penalty = new Penalty(0., alpha, adaptive, penalize_intercept);
 
   if(control.verbose) Rcpp::Rcout << "[LSVCMM] Initializing working covariance. working_covariance=" << working_covariance << "\n";
-  WorkingCovariance* working_cov = NULL;
-  if(working_covariance == "independence") working_cov = new Independence();
-  else if(working_covariance == "compound_symmetry") {
-    if(!estimate_variance_components and variance_ratio < 0.) variance_ratio = log(data.n);
-    working_cov = new CompoundSymmetry(variance_ratio, estimate_variance_components);
-  }
-  else Rcpp::stop("Working covariance not implemented");
-  Rcpp::Rcout << "         Working covariance: " << typeid(working_cov).name() << "\n";
+  // WorkingCovariance* working_cov = NULL;
+  // if(working_covariance == "independence") working_cov = new Independence();
+  // else if(working_covariance == "compound_symmetry") {
+  //   if(!estimate_variance_components and variance_ratio < 0.) variance_ratio = log(data.n);
+  //   working_cov = new CompoundSymmetry(variance_ratio, estimate_variance_components);
+  // }
+  // else Rcpp::stop("Working covariance not implemented");
+  // Rcpp::Rcout << "         Working covariance: " << typeid(working_cov).name() << "\n";
+  if(variance_ratio < 0.) variance_ratio = log(data.n);
+  CompoundSymmetry* working_cov = new CompoundSymmetry(variance_ratio, estimate_variance_components);
   data.P = working_cov->compute_precision(data.t);
 
   if(control.verbose) Rcpp::Rcout << "[LSVCMM] Initializing model \n";
-  Model model = Model(
+  Model* model = new Model(
     data.px,
     data.pu,
     estimated_time,
     penalty,
-    *working_cov,
-    *link_function,
-    *family,
-    control,
-    *kernel
+    working_cov,
+    link_function,
+    family,
+    kernel,
+    control
   );
 
   if(control.verbose) Rcpp::Rcout << "[LSVCMM] Preparing grid search \n";
   if(kernel_scale.n_elem == 0){
     double range = estimated_time.max() - estimated_time.min();
     double min_gap = arma::diff(estimated_time).min();
-    kernel_scale = arma::logspace<arma::colvec>(log10(min_gap/2.), log10(range), n_kernel_scale);
+    kernel_scale = arma::logspace<arma::colvec>(log10(min_gap/2.), log10(range/2.), n_kernel_scale);
     kernel_scale.print();
   }
 
