@@ -8,10 +8,10 @@
 #include "Model.hpp"
 #include "Interpolator.hpp"
 #include "Path.cpp"
+#include "Control.cpp"
 
 // [[Rcpp::depends(RcppArmadillo)]]
 
-// '@export
 // [[Rcpp::export()]]
 Rcpp::List LSVCMM(
     arma::colvec &response, // DATA
@@ -38,9 +38,10 @@ Rcpp::List LSVCMM(
     uint max_rounds, // CONTROL
     uint max_iter,
     double rel_tol,
-    uint verbose
+    uint verbose,
+    std::string update_method
 ){
-  Control control = Control(max_rounds, max_iter, rel_tol, verbose);
+  Control control = Control(max_rounds, max_iter, rel_tol, verbose, update_method);
 
   if(control.verbose) Rcpp::Rcout << "[LSVCMM] Initializing data \n";
   Data data = Data(

@@ -91,6 +91,7 @@ public:
           Rcpp::Rcout << "         Preparing adaptive penalty weights\n";
           this->model->penalty->lambda = 0.;
           this->model->fit(data);
+          this->model->logger->reset();
           this->model->penalty->update_weights(this->model->B);
           this->model->B.zeros();
         }
@@ -100,10 +101,11 @@ public:
       if(this->mode == "grid_search" and !this->new_kernel(m)) this->lambda(m) = this->lambda(m-1) * this->lambda_factor;
       this->model->penalty->lambda = this->lambda(m);
       // run
-      Rcpp::Rcout << "[LSVCMM] Fitting lambda=" << this->lambda(m) << "\n";
+      Rcpp::Rcout << "         Fitting lambda=" << this->lambda(m) << "\n";
       this->model->penalty->lambda = this->lambda(m);
       this->model->fit(data);
       models[m] = this->model->save();
+      this->model->logger->reset();
     }
     return models;
   }

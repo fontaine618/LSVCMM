@@ -1,5 +1,7 @@
 #include "RcppArmadillo.h"
 #include "WorkingCovariance.hpp"
+#include "Logger.cpp"
+#include "Control.cpp"
 
 //[[Rcpp::depends(RcppArmadillo)]]
 
@@ -81,17 +83,21 @@ std::vector<double> CompoundSymmetry::derivatives(
   return std::vector<double>{-0.5 * d1, -0.5 * d2};
 }
 
-void CompoundSymmetry::update_parameters(
+uint CompoundSymmetry::update_parameters(
     const std::vector<arma::colvec> &sr,
     const std::vector<arma::colvec> &t,
     const std::vector<arma::mat> &P,
-    const double dispersion
+    const double dispersion,
+    Logger* logger,
+    uint round,
+    Control *control
 ){
-  if(!this->estimate_parameters) return;
+  if(!this->estimate_parameters) return 0;
   double pllk = this->profile_likelihood(sr, P);
   double pllk_prev = pllk;
   std::vector<arma::mat> Ptmp = P;
-  for(uint iter=0; iter<20; iter++){
+  uint iter;
+  for(iter=0; iter<control->max_iter; iter++){
     std::vector<double> d = this->derivatives(sr, Ptmp, dispersion);
     if(d[1] > 0.){
       this->variance_ratio *= (d[0] > 0.) ? 2. : 0.5; // jump somewhere else
@@ -102,14 +108,16 @@ void CompoundSymmetry::update_parameters(
     this->variance_ratio = fmax(this->variance_ratio, 1e-6);
     Ptmp = this->compute_precision(t);
     pllk = this->profile_likelihood(sr, Ptmp);
-    if(fabs(pllk - pllk_prev) / fabs(pllk) < 1e-6) {
-      Rcpp::Rcout << "          .V." << iter << " pllk=" << pllk << " (re_ratio=" << this->variance_ratio <<
-        ", d1=" << d[0] << ", d2=" << d[1] << ")\n";
-      return;
+    logger->add_variance_iteration_results(round, iter, pllk);
+    if(control->verbose > 2) Rcpp::Rcout << "          " << round <<".V." << iter <<
+      " obj=" << pllk << "\n";
+    if(fabs(pllk - pllk_prev) / fabs(pllk) < control->rel_tol) {
+      break;
     }
     pllk_prev = pllk;
   }
-  // NB: precision update is not stored, need to redo it outside
+  // FIXME: precision update is not stored, need to redo it outside
+  return iter;
 }
 
 void CompoundSymmetry::add_to_results(Rcpp::List& results){

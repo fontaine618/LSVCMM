@@ -6,6 +6,8 @@
 #include "WorkingCovariance.hpp"
 #include "Penalty.hpp"
 #include "Model.hpp"
+#include "Logger.cpp"
+#include "Control.cpp"
 
 //[[Rcpp::depends(RcppArmadillo)]]
 
@@ -35,6 +37,8 @@ Model::Model(
   this->a = arma::colvec(pu, arma::fill::zeros);
   this->gB = arma::mat(px, estimated_time.n_elem, arma::fill::zeros);
   this->ga = arma::colvec(pu, arma::fill::zeros);
+
+  this->logger = new Logger();
 }
 
 Model::Model(){}
@@ -102,17 +106,11 @@ void Model::update_gradients(const Data &data){
   uint nt = this->B.n_cols;
   std::vector<arma::colvec> d = this->linkFunction->derivative(data.lp);
   for(uint i=0; i<data.N; i++){
-    // if(i==0) data.P[i].print("P[i]");
-    // if(i==0) data.sr[i].print("sr[i]");
-    // if(i==0) data.sPsr[i].print("sPsr[i]");
-    // if(i==0) data.W[i].print("W[i]");
-    // if(i==0) data.X[i].print("X[i]");
     arma::colvec dsPsr = d[i] % data.sPsr[i];
     for(uint j=0; j<nt; j++){
       arma::vec wdsPsr = data.W[i].col(j) % dsPsr;
       this->gB.col(j) += data.X[i].t() * wdsPsr;
     }
-    // if(i==0) this->gB.print("gB[i]");
     if(data.pu) this->ga += data.U[i].t() * dsPsr;
   }
   this->gB *= -1;
@@ -120,13 +118,41 @@ void Model::update_gradients(const Data &data){
 }
 
 void Model::proximal_gradient_step(){
-  // this->gB.print("gB");
+  // this->B.print("Current B");
+  // this->gB.print("Current B gradient");
+
   this->a -= this->ga / this->La;
-  // this->B.print("B before");
   this->B -= this->gB / this->LB;
-  // this->B.print("B GD");
   this->B = this->penalty->proximal(this->B, 1./this->LB);
-  // this->B.print("B PGD");
+
+  // this->B.print("New B");
+}
+
+void Model::accelerated_proximal_gradient_step(){
+  double pt = this->momentum;
+  double newt = 0.5 * (1. + sqrt(1 + 4.*pt*pt));
+
+  // Rcpp::Rcout << "pt: " << pt << std::endl;
+  // Rcpp::Rcout << "newt: " << newt << std::endl;
+
+  // regular PGD step
+  arma::colvec tmpa = this->a - this->ga / this->La;
+  arma::mat tmpB = this->B - this->gB / this->LB;
+  tmpB = this->penalty->proximal(tmpB, 1./this->LB);
+
+  // this->B.print("Current B");
+  // this->gB.print("Current B gradient");
+  // this->Bprev.print("Previous intermediate B");
+  // tmpB.print("New intermediate B");
+
+  this->a = tmpa + (pt - 1.) * (tmpa - this->aprev) / newt;
+  this->B = tmpB + (pt - 1.) * (tmpB - this->Bprev) / newt;
+
+  // this->B.print("New B");
+
+  this->aprev = tmpa;
+  this->Bprev = tmpB;
+  this->momentum = newt;
 }
 
 void Model::initialize(Data &data){}
@@ -136,6 +162,11 @@ arma::mat Model::hessian(const Data &data){
 
   // FIXME: not sure if this is correct for non-identity link?
   // should there be a second term?
+
+  // FIXME: this is also incorrect that it skips the cross terms in B
+  // which should be the HBB bith with different weights on either sides
+
+  // For the purpose of finding a Lipschitz bound I think this is fine
 
   // compute all blocks
   arma::mat Haa = arma::mat(data.pu, data.pu, arma::fill::zeros);
@@ -212,7 +243,8 @@ void Model::prepare_stepsize(Data &data){
     L *= 1.01;
     LmH = L - hessian;
   }
-  Rcpp::Rcout << "         factor=" << factor << ", min eval=" << arma::eig_sym(LmH).min() << "\n";
+  if(this->control.verbose > 1) Rcpp::Rcout << "         factor=" << factor <<
+    ", min eval=" << arma::eig_sym(LmH).min() << "\n";
 
   this->La = La*factor;
   this->LB = LB*factor;
@@ -221,11 +253,14 @@ void Model::prepare_stepsize(Data &data){
 double Model::lambda_max(Data &data){
   this->penalty->lambda = 1e10;
   this->fit(data);
+  this->logger->reset();
   return this->penalty->lambda_max(this->B, this->gB, 1./this->LB);
 }
 
 void Model::fit(Data &data){
-  Rcpp::Rcout << "lambda=" << this->penalty->lambda << "\n";
+  this->momentum = 1.;
+  this->aprev = this->a;
+  this->Bprev = this->B;
   this->update_precision(data);
   this->update_mean(data);
   double quad_term = this->quadratic_term(data);
@@ -236,19 +271,26 @@ void Model::fit(Data &data){
   double llk_old = llk;
   for(uint round=0; round<this->control.max_rounds; round++){
     double quad_term_old = quad_term;
-    for(uint iter=0; iter<this->control.max_iter; iter++){
+    uint mean_iter;
+    for(mean_iter=0; mean_iter<this->control.max_iter; mean_iter++){
       this->update_gradients(data);
-      this->proximal_gradient_step();
+      if(this->control.update_method == "PGD") this->proximal_gradient_step();
+      else if (this->control.update_method == "APGD") this->accelerated_proximal_gradient_step();
+      else Rcpp::stop("Unknown update method.");
       this->update_mean(data);
       quad_term = this->quadratic_term(data);
+      this->logger->add_mean_iteration_results(round, mean_iter, quad_term);
       if(fabs(quad_term - quad_term_old) / fabs(quad_term_old)< this->control.rel_tol){
-        Rcpp::Rcout << "         " << round << "." << "M" << "." << iter << ": obj=" << quad_term << "\n";
+        if(this->control.verbose > 2) Rcpp::Rcout << "         " << round << "." << "M" <<
+          "." << mean_iter << ": obj=" << quad_term << "\n";
         break;
       }
       quad_term_old = quad_term;
     }
     // variance update
-    this->workingCovariance->update_parameters(data.sr, data.t, data.P, this->family->dispersion);
+    uint variance_iter = this->workingCovariance->update_parameters(
+      data.sr, data.t, data.P, this->family->dispersion, this->logger, round, &this->control
+    );
     this->update_precision(data);
     quad_term = this->quadratic_term(data);
     this->family->dispersion = quad_term / data.n;
@@ -256,7 +298,8 @@ void Model::fit(Data &data){
     ld_precision = this->logdet_precision(data);
     ld_dispersion = this->logdet_dispersion(data);
     llk = this->quasi_log_likelihood(quad_term, ld_scaling + ld_dispersion - ld_precision);
-    Rcpp::Rcout << "         " << round << " llk=" << llk << "\n";
+    if(this->control.verbose > 1) Rcpp::Rcout << "         " << round << " llk=" << llk << "\n";
+    this->logger->add_round_results(round+1, mean_iter+1, variance_iter+1, llk);
     if(fabs(llk - llk_old) / fabs(llk_old) < this->control.rel_tol) break;
     llk_old = llk;
   }
@@ -302,6 +345,7 @@ Rcpp::List Model::save(){
   return Rcpp::List::create(
     Rcpp::Named("a", this->a),
     Rcpp::Named("B", this->B),
-    Rcpp::Named("results", clone(this->results))
+    Rcpp::Named("results", clone(this->results)),
+    Rcpp::Named("log", clone(this->logger->to_rcpp()))
   );
 }

@@ -12,8 +12,8 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // LSVCMM
-Rcpp::List LSVCMM(arma::colvec& response, arma::ucolvec& subject, arma::colvec& response_time, arma::mat& vcm_covariates, arma::mat& fixed_covariates, arma::colvec& offset, std::string family_name, std::string link, std::string kernel_name, arma::rowvec& estimated_time, arma::vec& kernel_scale, uint n_kernel_scale, bool penalize_intercept, double alpha, double adaptive, arma::vec& lambda, double lambda_factor, uint n_lambda, std::string working_covariance, bool estimate_variance_components, double variance_ratio, uint max_rounds, uint max_iter, double rel_tol, uint verbose);
-RcppExport SEXP _LSVCMM_LSVCMM(SEXP responseSEXP, SEXP subjectSEXP, SEXP response_timeSEXP, SEXP vcm_covariatesSEXP, SEXP fixed_covariatesSEXP, SEXP offsetSEXP, SEXP family_nameSEXP, SEXP linkSEXP, SEXP kernel_nameSEXP, SEXP estimated_timeSEXP, SEXP kernel_scaleSEXP, SEXP n_kernel_scaleSEXP, SEXP penalize_interceptSEXP, SEXP alphaSEXP, SEXP adaptiveSEXP, SEXP lambdaSEXP, SEXP lambda_factorSEXP, SEXP n_lambdaSEXP, SEXP working_covarianceSEXP, SEXP estimate_variance_componentsSEXP, SEXP variance_ratioSEXP, SEXP max_roundsSEXP, SEXP max_iterSEXP, SEXP rel_tolSEXP, SEXP verboseSEXP) {
+Rcpp::List LSVCMM(arma::colvec& response, arma::ucolvec& subject, arma::colvec& response_time, arma::mat& vcm_covariates, arma::mat& fixed_covariates, arma::colvec& offset, std::string family_name, std::string link, std::string kernel_name, arma::rowvec& estimated_time, arma::vec& kernel_scale, uint n_kernel_scale, bool penalize_intercept, double alpha, double adaptive, arma::vec& lambda, double lambda_factor, uint n_lambda, std::string working_covariance, bool estimate_variance_components, double variance_ratio, uint max_rounds, uint max_iter, double rel_tol, uint verbose, std::string update_method);
+RcppExport SEXP _LSVCMM_LSVCMM(SEXP responseSEXP, SEXP subjectSEXP, SEXP response_timeSEXP, SEXP vcm_covariatesSEXP, SEXP fixed_covariatesSEXP, SEXP offsetSEXP, SEXP family_nameSEXP, SEXP linkSEXP, SEXP kernel_nameSEXP, SEXP estimated_timeSEXP, SEXP kernel_scaleSEXP, SEXP n_kernel_scaleSEXP, SEXP penalize_interceptSEXP, SEXP alphaSEXP, SEXP adaptiveSEXP, SEXP lambdaSEXP, SEXP lambda_factorSEXP, SEXP n_lambdaSEXP, SEXP working_covarianceSEXP, SEXP estimate_variance_componentsSEXP, SEXP variance_ratioSEXP, SEXP max_roundsSEXP, SEXP max_iterSEXP, SEXP rel_tolSEXP, SEXP verboseSEXP, SEXP update_methodSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -42,13 +42,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< uint >::type max_iter(max_iterSEXP);
     Rcpp::traits::input_parameter< double >::type rel_tol(rel_tolSEXP);
     Rcpp::traits::input_parameter< uint >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(LSVCMM(response, subject, response_time, vcm_covariates, fixed_covariates, offset, family_name, link, kernel_name, estimated_time, kernel_scale, n_kernel_scale, penalize_intercept, alpha, adaptive, lambda, lambda_factor, n_lambda, working_covariance, estimate_variance_components, variance_ratio, max_rounds, max_iter, rel_tol, verbose));
+    Rcpp::traits::input_parameter< std::string >::type update_method(update_methodSEXP);
+    rcpp_result_gen = Rcpp::wrap(LSVCMM(response, subject, response_time, vcm_covariates, fixed_covariates, offset, family_name, link, kernel_name, estimated_time, kernel_scale, n_kernel_scale, penalize_intercept, alpha, adaptive, lambda, lambda_factor, n_lambda, working_covariance, estimate_variance_components, variance_ratio, max_rounds, max_iter, rel_tol, verbose, update_method));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_LSVCMM_LSVCMM", (DL_FUNC) &_LSVCMM_LSVCMM, 25},
+    {"_LSVCMM_LSVCMM", (DL_FUNC) &_LSVCMM_LSVCMM, 26},
     {NULL, NULL, 0}
 };
 

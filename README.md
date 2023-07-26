@@ -58,12 +58,10 @@ files, so they display on GitHub and CRAN.
 
 ## TODO
 
-[ ] Currently debugging fit()
-  - diverges.
-[ ] Perhaps move derivative of link funtion into update mean?
+[ ] Make things faster: APGD fails currently ...
+[ ] R wrapper
 
 ## BACKLOG
 
 [ ] CV?
-[ ] R wrapper
 [ ] Bootstrap

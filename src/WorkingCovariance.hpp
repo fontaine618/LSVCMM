@@ -1,4 +1,6 @@
 #include "RcppArmadillo.h"
+#include "Logger.cpp"
+#include "Control.cpp"
 
 //[[Rcpp::depends(RcppArmadillo)]]
 
@@ -24,11 +26,14 @@ public:
   arma::mat compute_precision(const arma::colvec &time);
   std::vector<arma::mat> compute_precision(const std::vector<arma::colvec> &time);
 
-  void update_parameters(
+  uint update_parameters(
       const std::vector<arma::colvec> &sr,
       const std::vector<arma::colvec> &t,
       const std::vector<arma::mat> &P,
-      const double dispersion
+      const double dispersion,
+      Logger *logger,
+      uint round,
+      Control *control
   );
 
   double profile_likelihood(

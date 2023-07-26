@@ -6,6 +6,7 @@
 #include "WorkingCovariance.hpp"
 #include "Penalty.hpp"
 #include "Control.cpp"
+#include "Logger.cpp"
 
 //[[Rcpp::depends(RcppArmadillo)]]
 
@@ -23,11 +24,15 @@ public:
 
   arma::mat B;
   arma::mat gB;
+  arma::mat Bprev;
   double LB = 0.1;
 
   arma::colvec a;
   arma::colvec ga;
+  arma::colvec aprev;
   double La = 0.01;
+
+  double momentum = 1.;
 
   Rcpp::List results = Rcpp::List::create();
 
@@ -39,6 +44,7 @@ public:
   Control control;
   arma::rowvec estimated_time;
   uint nt;
+  Logger *logger;
 
   Model();
   Model(
@@ -66,6 +72,7 @@ public:
   void update_gradients(const Data &data);
   arma::mat hessian(const Data &data);
   void proximal_gradient_step();
+  void accelerated_proximal_gradient_step();
   void fit(Data &data);
   void initialize(Data &data);
   void prepare_stepsize(Data &data);

@@ -13,12 +13,14 @@ public:
   uint max_iter = 100;
   double rel_tol= 1e-6;
   uint verbose = 0;
+  std::string update_method = "PGD";
 
-  Control(uint max_rounds, uint max_iter, double rel_tol, uint verbose){
+  Control(uint max_rounds, uint max_iter, double rel_tol, uint verbose, std::string update_method){
     this->max_iter = max_iter;
     this->max_rounds = max_rounds;
     this->rel_tol = rel_tol;
     this->verbose = verbose;
+    this->update_method = update_method;
   }
 
   Control(){}
