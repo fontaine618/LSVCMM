@@ -168,54 +168,78 @@ arma::mat Model::hessian(const Data &data){
 
   // For the purpose of finding a Lipschitz bound I think this is fine
 
-  // compute all blocks
-  arma::mat Haa = arma::mat(data.pu, data.pu, arma::fill::zeros);
-  std::vector<arma::mat> HaB(this->nt);
-  std::vector<arma::mat> HBB(this->nt);
-  for(uint t=0; t<this->nt; t++){
-    HaB[t] = arma::mat(data.pu, data.px, arma::fill::zeros);
-    HBB[t] = arma::mat(data.px, data.px, arma::fill::zeros);
-  }
+
+  uint dim = data.pu + data.px * this->nt;
+  arma::mat H = arma::mat(dim, dim, arma::fill::zeros);
+
   std::vector<arma::colvec> d = this->linkFunction->derivative(data.lp);
   for(uint i=0; i<data.N; i++){
+    uint ni = data.W[i].n_rows;
     arma::colvec ds = d[i] / data.s[i];
     arma::mat dsPsd = data.P[i];
     dsPsd.each_row() %= ds.t();
     dsPsd.each_col() %= ds;
-    arma::mat dsPsdU = dsPsd * data.U[i];
-    Haa = data.U[i].t() * dsPsdU;
+    arma::mat UwX = arma::mat(ni, dim, arma::fill::zeros);
+    if(data.pu) UwX.cols(0, data.pu-1) = data.U[i];
     for(uint t=0; t<this->nt; t++){
-      arma::colvec w = data.W[i].col(t);
       arma::mat wX = data.X[i];
-      wX.each_col() %= w;
-      arma::mat dsPsdwX = dsPsd * wX;
-      HaB[t] += data.U[i].t() * dsPsdwX;
-      HBB[t] += wX.t() * dsPsdwX;
+      wX.each_col() %= data.W[i].col(t);
+      UwX.cols(data.pu + t*data.px, data.pu + (t+1)*data.px - 1) = wX;
     }
+    H += UwX.t() * dsPsd * UwX;
   }
 
-  // construct full Hessian
-  uint dim = data.pu + data.px*this->nt;
-  arma::mat hessian = arma::mat(dim, dim, arma::fill::zeros);
 
-  if(data.pu > 0) hessian.submat(0, 0, data.pu - 1, data.pu - 1) = Haa;
-  for(uint k=0; k<this->nt; k++){
-    if(data.pu > 0){
-      hessian.submat(0,
-                     data.pu + k*data.px,
-                     data.pu - 1,
-                     data.pu + (k+1)*data.px - 1) = HaB[k];
-      hessian.submat(data.pu + k*data.px,
-                     0,
-                     data.pu + (k+1)*data.px - 1,
-                     data.pu - 1) = HaB[k].t();
-    }
-    hessian.submat(data.pu + k*data.px,
-                   data.pu + k*data.px,
-                   data.pu + (k+1)*data.px - 1,
-                   data.pu + (k+1)*data.px - 1) = HBB[k];
-  }
-  return hessian;
+  // // compute all blocks
+  // arma::mat Haa = arma::mat(data.pu, data.pu, arma::fill::zeros);
+  // std::vector<arma::mat> HaB(this->nt);
+  // std::vector<arma::mat> HBB(this->nt);
+  // for(uint t=0; t<this->nt; t++){
+  //   HaB[t] = arma::mat(data.pu, data.px, arma::fill::zeros);
+  //   HBB[t] = arma::mat(data.px, data.px, arma::fill::zeros);
+  // }
+  // std::vector<arma::colvec> d = this->linkFunction->derivative(data.lp);
+  // for(uint i=0; i<data.N; i++){
+  //
+  //   // easier to just concatenate U wX ... wX and take quad form with dsPsd
+  //   arma::colvec ds = d[i] / data.s[i];
+  //   arma::mat dsPsd = data.P[i];
+  //   dsPsd.each_row() %= ds.t();
+  //   dsPsd.each_col() %= ds;
+  //   arma::mat dsPsdU = dsPsd * data.U[i];
+  //   Haa = data.U[i].t() * dsPsdU;
+  //   for(uint t=0; t<this->nt; t++){
+  //     arma::colvec w = data.W[i].col(t);
+  //     arma::mat wX = data.X[i];
+  //     wX.each_col() %= w;
+  //     arma::mat dsPsdwX = dsPsd * wX;
+  //     HaB[t] += data.U[i].t() * dsPsdwX;
+  //     HBB[t] += wX.t() * dsPsdwX;
+  //   }
+  // }
+  //
+  // // construct full Hessian
+  // uint dim = data.pu + data.px*this->nt;
+  // arma::mat hessian = arma::mat(dim, dim, arma::fill::zeros);
+  //
+  // if(data.pu > 0) hessian.submat(0, 0, data.pu - 1, data.pu - 1) = Haa;
+  // for(uint k=0; k<this->nt; k++){
+  //   if(data.pu > 0){
+  //     hessian.submat(0,
+  //                    data.pu + k*data.px,
+  //                    data.pu - 1,
+  //                    data.pu + (k+1)*data.px - 1) = HaB[k];
+  //     hessian.submat(data.pu + k*data.px,
+  //                    0,
+  //                    data.pu + (k+1)*data.px - 1,
+  //                    data.pu - 1) = HaB[k].t();
+  //   }
+  //   hessian.submat(data.pu + k*data.px,
+  //                  data.pu + k*data.px,
+  //                  data.pu + (k+1)*data.px - 1,
+  //                  data.pu + (k+1)*data.px - 1) = HBB[k];
+  // }
+  return H;
 }
 
 void Model::prepare_stepsize(Data &data){
@@ -270,6 +294,7 @@ void Model::fit(Data &data){
   double llk = this->quasi_log_likelihood(quad_term, ld_scaling + ld_dispersion - ld_precision);
   double llk_old = llk;
   for(uint round=0; round<this->control.max_rounds; round++){
+    // this->prepare_stepsize(data);
     double quad_term_old = quad_term;
     uint mean_iter;
     for(mean_iter=0; mean_iter<this->control.max_iter; mean_iter++){

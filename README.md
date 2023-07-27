@@ -59,9 +59,16 @@ files, so they display on GitHub and CRAN.
 ## TODO
 
 [ ] Make things faster: APGD fails currently ...
-[ ] R wrapper
 
 ## BACKLOG
 
 [ ] CV?
 [ ] Bootstrap
+
+## STATUS
+
+- New implementation completed
+- No longer see the weird bias
+- Selection make more sense now
+- Estimation of variance parameters much better now
+- Still have some convergence issues that need to be resolved. Mostly for larger kernel scale

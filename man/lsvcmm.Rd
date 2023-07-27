@@ -18,11 +18,12 @@ lsvcmm(
   kernel = DEFAULT_KERNEL_ARGS,
   penalty = DEFAULT_PENALTY_ARGS,
   working_covariance = DEFAULT_WORKING_COVARIANCE_ARGS,
-  control = DEFAULT_CONTROL_ARGS
+  control = DEFAULT_CONTROL_ARGS,
+  return_models = F
 )
 }
 \arguments{
-\item{control}{}
+\item{return_models}{}
 }
 \description{
 Title
