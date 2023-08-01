@@ -272,6 +272,11 @@ double Model::lambda_max(Data &data){
 }
 
 void Model::fit(Data &data){
+  // hack for the moment
+  if(this->kernel->scale > 0.5) this->control->update_method = "BPGD";
+  else this->control->update_method = "PGD";
+
+  this->logger->reset();
   this->momentum = 1.;
   this->aprev = this->a;
   this->Bprev = this->B;
@@ -356,15 +361,20 @@ void Model::prepare_ics(const Data &data){
   mult = fmax(1. / df.n_elem, mult); // when h is large, we need to keep 1 df
   arma::rowvec df_kernel = df * mult;
 
-  results["df"] = arma::accu(df);
-  results["df_kernel"] = arma::accu(df_kernel);
-  results["df_logn"] = arma::dot(df, arma::log(nhat));
-  results["df_logn_kernel"] = arma::dot(df_kernel, arma::log(nhat));
+  results["df"] = arma::accu(df) + data.pu;
+  results["df_kernel"] = arma::accu(df_kernel) + data.pu;
+  results["df_logn"] = arma::dot(df, arma::log(nhat)) + data.pu * log(data.n);
+  results["df_logn_kernel"] = arma::dot(df_kernel, arma::log(nhat)) + data.pu * log(data.n);
+  results["df_max"] = data.px * this->nt + data.pu;
 
   results["aic"] = -2 * (double)results["llk"] + 2 * (double)results["df"];
-  results["bic"] = -2 * (double)results["llk"] + (double)results["df_logn"];
   results["aich"] = -2 * (double)results["llk"] + 2 * (double)results["df_kernel"];
+  results["bic"] = -2 * (double)results["llk"] + (double)results["df_logn"];
   results["bich"] = -2 * (double)results["llk"] + (double)results["df_logn_kernel"];
+  results["ebic"] = -2 * (double)results["llk"] + (double)results["df_logn"] +
+    (double)results["df"] * (double)results["df_max"];
+  results["ebich"] = -2 * (double)results["llk"] + (double)results["df_logn_kernel"] +
+    (double)results["df_kernel"] * (double)results["df_max"];
 }
 
 Rcpp::List Model::save(){

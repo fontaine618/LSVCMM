@@ -39,8 +39,8 @@ public:
       this->new_kernel(i*n_lambda) = 1;
     }
     this->lambda_factor = pow(lambda_factor_, 1./(n_lambda-1.));
-    Rcpp::Rcout << "[LSVCMM] Lambda factor: " << this->lambda_factor << " lambda_factor_=" <<
-      lambda_factor_ << " n_lambda=" << n_lambda <<"\n";
+    // Rcpp::Rcout << "[LSVCMM] Lambda factor: " << this->lambda_factor << " lambda_factor_=" <<
+    //   lambda_factor_ << " n_lambda=" << n_lambda <<"\n";
   }
 
   Path(
@@ -89,7 +89,6 @@ public:
           Rcpp::Rcout << "         Preparing adaptive penalty weights\n";
           this->model->penalty->lambda = 0.;
           this->model->fit(data);
-          this->model->logger->reset();
           this->model->penalty->update_weights(this->model->B);
           this->model->B.zeros();
         }
@@ -102,16 +101,6 @@ public:
       Rcpp::Rcout << "         Fitting lambda=" << this->lambda(m) << "\n";
       this->model->penalty->lambda = this->lambda(m);
       this->model->fit(data);
-
-      // this->model->gB.print("gB");
-      // data.I[0].print("I");
-      // data.W[0].print("W");
-      // data.X[0].print("X");
-      // data.P[0].print("P");
-      // data.y[0].print("y");
-      // data.m[0].print("m");
-      // data.r[0].print("r");
-      // data.sPsr[0].print("sPsr");
 
       models[m] = this->model->save();
       this->model->logger->reset();
