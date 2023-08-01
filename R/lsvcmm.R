@@ -69,7 +69,6 @@ lsvcmm = function(
   control = control_args(control)
   data = data_args(data, response, subject, time, vc_covariates, nvc_covariates, offset, add_intercept)
   time = time_args(data$t, estimated_time)
-
   # CALL
   fit = LSVCMM(
     response=data$response,
