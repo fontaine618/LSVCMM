@@ -121,6 +121,7 @@ uint CompoundSymmetry::update_parameters(
 }
 
 void CompoundSymmetry::add_to_results(Rcpp::List& results){
-  results["working_covariance.variance_ratio"] = this->variance_ratio;
+  results["working_covariance.estimate"] = this->estimate_parameters;
+  results["working_covariance.ratio"] = this->variance_ratio;
   results["working_covariance.name"] = "compound_symmetry";
 }

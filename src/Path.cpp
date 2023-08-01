@@ -77,8 +77,6 @@ public:
         data.W = this->model->kernel->eval(this->model->estimated_time, data.t);
         // prepare Lipschitz constants
         Rcpp::Rcout << "         Computing Lipschitz constants\n";
-        this->model->update_mean(data);
-        this->model->update_precision(data);
         this->model->prepare_stepsize(data);
         this->model->penalty->unit_weights(this->model->B);
         // find largest lambda
@@ -104,6 +102,17 @@ public:
       Rcpp::Rcout << "         Fitting lambda=" << this->lambda(m) << "\n";
       this->model->penalty->lambda = this->lambda(m);
       this->model->fit(data);
+
+      // this->model->gB.print("gB");
+      // data.I[0].print("I");
+      // data.W[0].print("W");
+      // data.X[0].print("X");
+      // data.P[0].print("P");
+      // data.y[0].print("y");
+      // data.m[0].print("m");
+      // data.r[0].print("r");
+      // data.sPsr[0].print("sPsr");
+
       models[m] = this->model->save();
       this->model->logger->reset();
     }

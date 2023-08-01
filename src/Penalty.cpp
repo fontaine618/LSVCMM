@@ -84,10 +84,11 @@ void Penalty::unit_weights(const arma::mat &B){
 }
 
 void Penalty::add_to_results(Rcpp::List& results){
+  results["penalty.name"] = "adaptive_sparse_group_lasso";
   results["penalty.alpha"] = this->alpha;
   results["penalty.lambda"] = this->lambda;
   results["penalty.adaptive"] = this->power;
-  results["penalty.name"] = "adaptive_sparse_group_lasso";
+  results["penalty.penalize_intercept"] = this->penalize_intercept;
 }
 
 double Penalty::lambda_max(arma::mat B, const arma::mat &gB, const double stepsize){
@@ -129,4 +130,11 @@ double Penalty::lambda_max(arma::mat B, const arma::mat &gB, const double stepsi
     // tmpB.print("tmpB");
   }
   return lambda_max*1.1;
+}
+
+
+double Penalty::eval(const arma::mat &B){
+  double l1term = arma::accu(this->W1 % arma::abs(B));
+  double l2term = arma::accu(this->w2 % arma::sqrt(arma::sum(arma::pow(B, 2), 1)));
+  return this->lambda * (this->alpha * l1term + (1 - this->alpha) * l2term * sqrt(B.n_cols));
 }

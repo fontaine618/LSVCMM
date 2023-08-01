@@ -77,8 +77,13 @@ lsvcmm = function(
     max_iter=control$max_iter,
     rel_tol=control$rel_tol,
     verbose=control$verbose,
-    update_method=control$update_method
+    update_method=control$update_method,
+    backtracking_fraction=control$backtracking_fraction
   )
+  fit = lapply(fit, function(model){
+    class(model) = "LSVCMM"
+    model
+  })
 
   # SUMMARIZE RESULTS
   models_path = lapply(fit, function(model) data.frame(model$results)) %>% dplyr::bind_rows()
@@ -99,12 +104,13 @@ lsvcmm = function(
     results=models_path,
     nvc_path=a,
     vc_path=b,
-    scaled_time=time$scaled,
-    unscaled_time=time$unscaled
+    scaled_time=time$scaled, # the one used during optimization
+    unscaled_time=time$unscaled, # the corresponding values in the original scale
+    range_time=time$range # sufficient to map to scaled time
   )
   if(return_models) res$models = fit
 
-  class(res) = c("LSVCMM")
+  class(res) = c("LSVCMM.Path")
   return(res)
 }
 

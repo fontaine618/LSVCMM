@@ -24,9 +24,10 @@ kernel_args = function(args){
   return(out)
 }
 
-DEFAULT_PENALTY_ARGS = list(name="sgl", alpha=1., lambda=NULL, n_lambda=100L,
+DEFAULT_PENALTY_ARGS = list(name="adaptive_sparse_group_lasso", alpha=1.,
+                            lambda=NULL, n_lambda=100L,
                             lambda_factor=0.001, adaptive=0., penalize_intercept=F)
-IMPLEMENTED_PENALTIES = c("sgl")
+IMPLEMENTED_PENALTIES = c("adaptive_sparse_group_lasso")
 
 penalty_args = function(args){
   out = DEFAULT_PENALTY_ARGS
@@ -51,7 +52,8 @@ working_covariance_args = function(args){
   return(out)
 }
 
-DEFAULT_CONTROL_ARGS = list(max_rounds=50, max_iter=1000, rel_tol=1e-6, verbose=1, update_method="PGD")
+DEFAULT_CONTROL_ARGS = list(max_rounds=50, max_iter=1000, rel_tol=1e-6, verbose=1, update_method="PGD",
+                            backtracking_fraction=0.9)
 
 control_args = function(args){
   out = DEFAULT_CONTROL_ARGS
@@ -60,7 +62,8 @@ control_args = function(args){
   stopifnot(out[["max_iter"]] > 0)
   stopifnot(out[["rel_tol"]] > 0)
   stopifnot(out[["verbose"]] %in% c(0, 1, 2, 3))
-  stopifnot(out[["update_method"]] %in% c("PGD", "APGD"))
+  stopifnot(out[["update_method"]] %in% c("PGD", "BPGD"))
+  stopifnot(out[["backtracking_fraction"]] > 0 & out[["backtracking_fraction"]] < 1)
   return(out)
 }
 
@@ -73,7 +76,8 @@ time_args = function(observed_time, estimated_time){
   return(list(
     scaled=scaled_estimated,
     unscaled=estimated_time,
-    scaled_observed=scaled_observed
+    scaled_observed=scaled_observed,
+    range=trange
   ))
 }
 

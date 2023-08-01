@@ -26,11 +26,13 @@ public:
   arma::mat gB;
   arma::mat Bprev;
   double LB = 0.1;
+  double ssB = 0.1;
 
   arma::colvec a;
   arma::colvec ga;
   arma::colvec aprev;
   double La = 0.01;
+  double ssa = 0.01;
 
   double momentum = 1.;
 
@@ -41,7 +43,7 @@ public:
   CompoundSymmetry *workingCovariance;
   Identity *linkFunction;
   Gaussian *family;
-  Control control;
+  Control *control;
   arma::rowvec estimated_time;
   uint nt;
   Logger *logger;
@@ -56,7 +58,7 @@ public:
     Identity* linkFunction,
     Gaussian* family,
     GaussianKernel* kernel,
-    Control control
+    Control* control
   );
 
   std::vector<arma::colvec> linear_predictor(Data &data); // linear predictor for each observation
@@ -71,16 +73,21 @@ public:
 
   void update_gradients(const Data &data);
   arma::mat hessian(const Data &data);
-  void proximal_gradient_step();
+  void proximal_gradient_step(Data &data);
   void accelerated_proximal_gradient_step();
+  void backtracking_proximal_gradient_step(Data &data);
+  void backtracking_accelerated_proximal_gradient_step(const Data &data);
   void fit(Data &data);
   void initialize(Data &data);
   void prepare_stepsize(Data &data);
+  void reset_stepsize();
   double lambda_max(Data &data);
 
   void prepare_results(const Data &data);
   void prepare_ics(const Data &data);
   Rcpp::List save();
+
+  void set(Rcpp::List& results);
 
 
 };

@@ -29,7 +29,7 @@ generate_synthetic_data = function(
   set.seed(seed)
   corr = random_effect_ar1_correlation^seq(0, n_timepoints-1)
   corrmat = stats::toeplitz(corr)
-  thetamat = mvtnorm::rmvnorm(n_subjects, sigma=corrmat) * sqrt(random_effect_variance_ratio)
+  thetamat = mvtnorm::rmvnorm(n_subjects, sigma=corrmat) * sqrt(random_effect_variance_ratio) * sqrt(observation_variance)
   t0 = seq(0, n_timepoints-1) / (n_timepoints-1)
   timemat = matrix(t0, n_subjects, n_timepoints, byrow=T)
   f0 = function(t) t*0.

@@ -40,6 +40,8 @@ public:
 
   double lambda_max(arma::mat B, const arma::mat &gB, const double stepsize);
 
+  double eval(const arma::mat &B);
+
 };
 
 #endif
