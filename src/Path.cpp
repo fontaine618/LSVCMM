@@ -1,6 +1,7 @@
 #include "RcppArmadillo.h"
 #include "Model.h"
 #include "Data.h"
+#include "uint.h"
 
 // [[Rcpp::depends(RcppArmadillo)]]
 

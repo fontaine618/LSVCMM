@@ -1,6 +1,7 @@
 #include "RcppArmadillo.h"
 #include "Logger.cpp"
 #include "Control.cpp"
+#include "uint.h"
 
 //[[Rcpp::depends(RcppArmadillo)]]
 

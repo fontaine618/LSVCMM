@@ -1,5 +1,6 @@
 #include "RcppArmadillo.h"
 #include "GaussianKernel.h"
+#include "uint.h"
 
 // [[Rcpp::depends(RcppArmadillo)]]
 

@@ -9,6 +9,7 @@
 #include "Interpolator.h"
 #include "Path.cpp"
 #include "Control.cpp"
+#include "uint.h"
 
 // [[Rcpp::depends(RcppArmadillo)]]
 

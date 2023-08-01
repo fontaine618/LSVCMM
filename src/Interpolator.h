@@ -1,4 +1,5 @@
 #include "RcppArmadillo.h"
+#include "uint.h"
 
 //[[Rcpp::depends(RcppArmadillo)]]
 
