@@ -1,5 +1,5 @@
 #include "RcppArmadillo.h"
-#include "Penalty.hpp"
+#include "Penalty.h"
 
 //[[Rcpp::depends(RcppArmadillo)]]
 

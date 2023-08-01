@@ -1,8 +1,25 @@
+# ==============================================================================
 DEFAULT_FAMILY_ARGS = list(response="gaussian" , link="identity")
 IMPLEMENTED_FAMILIES = c("gaussian")
 IMPLEMENTED_LINKS = c("identity")
 
 
+#' Prepare family arguments
+#'
+#' @param args A list of arguments. See See *Details*.
+#'
+#' @details
+#' The following arguments are supported:
+#' \describe{
+#'  \item{\code{response}}{The response distribution. Currently, only \code{"gaussian"} is supported.}
+#'  \item{\code{link}}{The link function. Currently, only \code{"identity"} is supported.}
+#'  \item{\code{...}}{Additional arguments. Currently ignored.}
+#' }
+#'
+#' If an argument is not specified, the default value is used.
+#'
+#' @return A list of arguments
+#' @export
 family_args = function(args){
   out = DEFAULT_FAMILY_ARGS
   for(name in names(out)) if(!is.null(args[[name]])) out[[name]] = args[[name]]
@@ -11,9 +28,30 @@ family_args = function(args){
   return(out)
 }
 
+# ==============================================================================
 DEFAULT_KERNEL_ARGS = list(name="gaussian", scale=NULL, n_scale=11L)
 IMPLEMENTED_KERNELS = c("gaussian")
 
+
+#' Prepare kernel arguments
+#'
+#' @param args A list of arguments. See *Details*.
+#'
+#' @details
+#' The following arguments are supported:
+#' \describe{
+#' \item{\code{name}}{The kernel function. Currently, only \code{"gaussian"} is supported.}
+#' \item{\code{scale}}{The scale parameter. If \code{NULL}, a logarithmic grid search is used.}
+#' \item{\code{n_scale}}{The number of scale parameters to use if \code{scale} is \code{NULL} (default.)}
+#' \item{\code{...}}{Additional arguments. Currently ignored.}
+#' }
+#'
+#' For the grid search, the range is defined to be \eqn{[L, U]} where
+#' \eqn{L} is half the smallest gap in estimated time points and
+#' \eqn{U} is twice the range of estimated time points.
+#'
+#' @return A list of arguments
+#' @export
 kernel_args = function(args){
   out = DEFAULT_KERNEL_ARGS
   for(name in names(out)) if(!is.null(args[[name]])) out[[name]] = args[[name]]
@@ -24,11 +62,37 @@ kernel_args = function(args){
   return(out)
 }
 
+# ==============================================================================
 DEFAULT_PENALTY_ARGS = list(name="adaptive_sparse_group_lasso", alpha=1.,
                             lambda=NULL, n_lambda=100L,
                             lambda_factor=0.001, adaptive=0., penalize_intercept=F)
 IMPLEMENTED_PENALTIES = c("adaptive_sparse_group_lasso")
 
+
+#' Prepare penalty arguments
+#'
+#' @param args A list of arguments. See See *Details*.
+#'
+#' @details
+#' The following arguments are supported:
+#' \describe{
+#' \item{\code{name}}{The penalty function. Currently, only \code{"adaptive_sparse_group_lasso"} is supported.}
+#' \item{\code{alpha}}{The mixing parameter. Must be between 0 and 1. 1 is pure Lasso (default); 0 is pure group Lasso.}
+#' \item{\code{lambda}}{The penalty parameter. If \code{NULL} (default), a logarithmic grid search is used.}
+#' \item{\code{n_lambda}}{The number of penalty parameters to use if \code{lambda} is \code{NULL} (default.)}
+#' \item{\code{lambda_factor}}{The factor by which the penalty parameter is reduced overall (default: \code{1e-4}.)}
+#' \item{\code{adaptive}}{The adaptive parameter. Must be non-negative (default: \code{0.}.)}
+#' \item{\code{penalize_intercept}}{Whether to penalize the intercept. Must be \code{TRUE} (default) or \code{FALSE}.}
+#' \item{\code{...}}{Additional arguments. Currently ignored.}
+#' }
+#'
+#' For the grid search, we first obtain the minimum \eqn{\lambda_\max} for which the solution is zero.
+#' Then, a logarithmically-space sequence of \eqn{\lambda} values is generated starting from  \eqn{\lambda_\max} and
+#' ending at \eqn{\lambda_\max \times \texttt{lambda_factor}}.
+#'
+#'
+#' @return A list of arguments
+#' @export
 penalty_args = function(args){
   out = DEFAULT_PENALTY_ARGS
   for(name in names(out)) if(!is.null(args[[name]])) out[[name]] = args[[name]]
@@ -42,9 +106,25 @@ penalty_args = function(args){
   return(out)
 }
 
+# ==============================================================================
 DEFAULT_WORKING_COVARIANCE_ARGS = list(name="compound_symmetry", estimate=T, ratio=-1)
 IMPLEMENTED_WORKING_COVARIANCES = c("compound_symmetry")
 
+#' Prepare working covariance arguments
+#'
+#' @param args A list of arguments. See See *Details*.
+#'
+#' @details
+#' The following arguments are supported:
+#' \describe{
+#' \item{\code{name}}{The working covariance function. Currently, only \code{"compound_symmetry"} is supported.}
+#' \item{\code{estimate}}{Whether to estimate the parameters. Must be \code{TRUE} (default) or \code{FALSE}.}
+#' \item{\code{ratio}}{The ratio of the variance of the random effects to the variance of the error term.
+#' If negative (default), the ratio is estimated to `log(n)`.}
+#' }
+#'
+#' @return A list of arguments
+#' @export
 working_covariance_args = function(args){
   out = DEFAULT_WORKING_COVARIANCE_ARGS
   for(name in names(out)) if(!is.null(args[[name]])) out[[name]] = args[[name]]
@@ -52,9 +132,28 @@ working_covariance_args = function(args){
   return(out)
 }
 
+# ==============================================================================
 DEFAULT_CONTROL_ARGS = list(max_rounds=50, max_iter=1000, rel_tol=1e-6, verbose=1, update_method="PGD",
                             backtracking_fraction=0.9)
 
+#' Prepare control arguments
+#'
+#' @param args A list of arguments. See See *Details*.
+#'
+#' @details
+#' The following arguments are supported:
+#' \describe{
+#' \item{\code{max_rounds}}{The maximum number of rounds of coordinate descent (default: 50.)}
+#' \item{\code{max_iter}}{The maximum number of iterations per round (default: 1000.)}
+#' \item{\code{rel_tol}}{The relative tolerance for convergence (default: \code{1e-6}.)}
+#' \item{\code{verbose}}{The verbosity level. Must be 0, 1(default), 2, or 3.}
+#' \item{\code{update_method}}{The update method. Must be \code{"PGD"} or \code{"BPGD"}. Currently overwritten.}
+#' \item{\code{backtracking_fraction}}{The backtracking fraction. Must be between 0 and 1 (default: \code{0.9}.)}
+#' \item{\code{...}}{Additional arguments. Currently ignored.}
+#' }
+#'
+#' @return A list of arguments
+#' @export
 control_args = function(args){
   out = DEFAULT_CONTROL_ARGS
   for(name in names(out)) if(!is.null(args[[name]])) out[[name]] = args[[name]]
@@ -67,6 +166,7 @@ control_args = function(args){
   return(out)
 }
 
+# ==============================================================================
 time_args = function(observed_time, estimated_time){
   if(is.null(estimated_time)) estimated_time = unique(observed_time)
   estimated_time = sort(estimated_time)
@@ -81,6 +181,7 @@ time_args = function(observed_time, estimated_time){
   ))
 }
 
+# ==============================================================================
 data_args = function(
     data,
     response,

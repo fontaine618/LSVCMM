@@ -2,7 +2,7 @@
 % Please edit documentation in R/lsvcmm.R
 \name{lsvcmm}
 \alias{lsvcmm}
-\title{Title}
+\title{Locally Sparse Varying Coefficient Mixed Models}
 \usage{
 lsvcmm(
   data,
@@ -23,8 +23,65 @@ lsvcmm(
 )
 }
 \arguments{
-\item{return_models}{}
+\item{data}{A data frame containing the variables in the model.}
+
+\item{response}{The name of the response variable in \code{data}.}
+
+\item{subject}{The name of the subject variable in \code{data}.}
+
+\item{time}{The name of the time variable in \code{data}.}
+
+\item{vc_covariates}{The names of the varying coefficient covariates in \code{data}.}
+
+\item{nvc_covariates}{The names of the non-varying coefficient covariates in \code{data}.}
+
+\item{offset}{The name of the offset variable in \code{data}.}
+
+\item{add_intercept}{Whether to add an intercept to the model.}
+
+\item{estimated_time}{The time points at which to estimate the varying coefficients. If missing, all observed time points are used.}
+
+\item{family}{A list of arguments for the response distribution. See \code{\link{family_args}}.}
+
+\item{kernel}{A list of arguments for the kernel. See \code{\link{kernel_args}}.}
+
+\item{penalty}{A list of arguments for the penalty. See \code{\link{penalty_args}}.}
+
+\item{working_covariance}{A list of arguments for the working covariance. See \code{\link{working_covariance_args}}.}
+
+\item{control}{A list of arguments for the control parameters. See \code{\link{control_args}}.}
+
+\item{return_models}{Whether to return the fitted models.}
+}
+\value{
+A list containing the following elements:
+\describe{
+\item{family}{A list of arguments for the response distribution. See \code{\link{family_args}}.}
+\item{kernel}{A list of arguments for the kernel. See \code{\link{kernel_args}}.}
+\item{penalty}{A list of arguments for the penalty. See \code{\link{penalty_args}}.}
+\item{working_covariance}{A list of arguments for the working covariance. See \code{\link{working_covariance_args}}.}
+\item{control}{A list of arguments for the control parameters. See \code{\link{control_args}}.}
+\item{results}{A data frame containing the results of the optimization. Each row is a model resulting from a particular tuning parameter combination.}
+\item{nvc_path}{A matrix containing the estimated non-varying coefficient path of dimension (\code{p_u}, \code{n_models}).}
+\item{vc_path}{An array containing the estimated varying coefficient path of dimension (\code{p_x}, \code{n_timepoints}, \code{n_models}).}
+\item{scaled_time}{The time points at which the varying coefficients were estimated.}
+\item{unscaled_time}{The corresponding values in the original scale.}
+\item{range_time}{The range of the time points.}
+\item{models}{A list of the fitted models.}
+}
 }
 \description{
-Title
+Locally Sparse Varying Coefficient Mixed Models
+}
+\details{
+The \code{lsvcmm} function fits a locally sparse varying coefficient mixed model (LSVCMM) to longitudinal data.
+
+The LSVCMM is a semiparametric model for longitudinal data that allows the coefficients of the
+non-varying covariates to vary smoothly over time. The model is defined as
+\deqn{Y_{ij} = \beta_0(t_{ij}) + \sum_{k=1}^p \beta_k(t_{ij}) X_{ijk} + \epsilon_{ij},}
+where \eqn{Y_{ij}} is the response of the \eqn{i}-th subject at time \eqn{t_{ij}},
+\eqn{X_{ijk}} is the \eqn{k}-th non-varying covariate of the \eqn{i}-th subject at time \eqn{t_{ij}},
+\eqn{\beta_0(t)} is the intercept function,
+\eqn{\beta_k(t)} is the coefficient function of the \eqn{k}-th non-varying covariate,
+and \eqn{\epsilon_{ij}} is the error term.
 }

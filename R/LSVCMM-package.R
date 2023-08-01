@@ -1,6 +1,9 @@
+#' @keywords internal
+"_PACKAGE"
+
 ## usethis namespace: start
 #' @importFrom Rcpp evalCpp
 #' @useDynLib LSVCMM, .registration = TRUE
-#' @exportPattern "^[[:alpha:]]+"
 ## usethis namespace: end
 NULL
+

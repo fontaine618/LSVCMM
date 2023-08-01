@@ -1,5 +1,5 @@
 #include "RcppArmadillo.h"
-#include "Interpolator.hpp"
+#include "Interpolator.h"
 
 //[[Rcpp::depends(RcppArmadillo)]]
 

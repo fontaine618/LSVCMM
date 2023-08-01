@@ -1,5 +1,5 @@
 #include "RcppArmadillo.h"
-#include "WorkingCovariance.hpp"
+#include "WorkingCovariance.h"
 #include "Logger.cpp"
 #include "Control.cpp"
 

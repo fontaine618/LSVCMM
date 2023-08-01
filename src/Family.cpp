@@ -1,5 +1,5 @@
 #include "RcppArmadillo.h"
-#include "Family.hpp"
+#include "Family.h"
 
 //[[Rcpp::depends(RcppArmadillo)]]
 

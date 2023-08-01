@@ -1,12 +1,12 @@
 #include "RcppArmadillo.h"
-#include "Data.hpp"
-#include "GaussianKernel.hpp"
+#include "Data.h"
+#include "GaussianKernel.h"
 #include "LinkFunction.cpp"
-#include "Family.hpp"
-#include "WorkingCovariance.hpp"
-#include "Penalty.hpp"
-#include "Control.cpp"
+#include "Family.h"
+#include "WorkingCovariance.h"
+#include "Penalty.h"
 #include "Logger.cpp"
+#include "Control.cpp"
 
 //[[Rcpp::depends(RcppArmadillo)]]
 
