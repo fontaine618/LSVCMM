@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-Last updated: *Aug-1-2023*
+Last updated: *Aug-01-2023*
 
 # LSVCMM
 
@@ -30,10 +30,3 @@ This is a basic example which shows you how to solve a common problem:
 library(LSVCMM)
 ## basic example code
 ```
-
-
-## BACKLOG
-
-[ ] CV?
-[ ] Bootstrap
-
