@@ -19,12 +19,30 @@
     <loc>/news/index.html</loc>
   </url>
   <url>
+    <loc>/reference/LSVCMM-package.html</loc>
+  </url>
+  <url>
+    <loc>/reference/control_args.html</loc>
+  </url>
+  <url>
+    <loc>/reference/family_args.html</loc>
+  </url>
+  <url>
     <loc>/reference/generate_synthetic_data.html</loc>
   </url>
   <url>
     <loc>/reference/index.html</loc>
   </url>
   <url>
+    <loc>/reference/kernel_args.html</loc>
+  </url>
+  <url>
     <loc>/reference/lsvcmm.html</loc>
+  </url>
+  <url>
+    <loc>/reference/penalty_args.html</loc>
+  </url>
+  <url>
+    <loc>/reference/working_covariance_args.html</loc>
   </url>
 </urlset>

@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">LSVCMM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9001</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -65,11 +65,101 @@
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
-    <dl><dt>seed</dt>
-<dd></dd>
+    <dl><dt>n_subjects</dt>
+<dd><p>Number of subjects (default 100). Half of them are in group 0 and the other half in group 1 (on average).</p></dd>
+
+
+<dt>n_timepoints</dt>
+<dd><p>Number of time points at which the data is sampled spread regularly on the \([0,1]\) interval (default 11).</p></dd>
+
+
+<dt>prop_observed</dt>
+<dd><p>Proportion of observed time points (default 0.7).</p></dd>
+
+
+<dt>observation_variance</dt>
+<dd><p>Variance of the observation error (default 1).</p></dd>
+
+
+<dt>random_effect_variance_ratio</dt>
+<dd><p>Ratio of the variance of the random effect to the variance of the observation error (default 1).</p></dd>
+
+
+<dt>random_effect_ar1_correlation</dt>
+<dd><p>Correlation between two random effects at two consecutive timepoints (default 0.9).</p></dd>
+
+
+<dt>effect_size</dt>
+<dd><p>Effect size of the group (default 1).</p></dd>
+
+
+<dt>seed</dt>
+<dd><p>Seed for the random number generator (default 1).</p></dd>
+
+</dl></div>
+    <div class="section level2">
+    <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    
+
+<p>A list containing the following elements:</p><dl><dt>data</dt>
+<dd><p>A data frame containing the longitudinal data in long format.</p></dd>
+
+<dt>data_wide</dt>
+<dd><p>A data frame containing the longitudinal data in wide format.</p></dd>
+
+<dt>data_wide_imputed</dt>
+<dd><p>A data frame containing the longitudinal data in wide format with imputed missing values.</p></dd>
+
+<dt>true_values</dt>
+<dd><p>A data frame containing the true values of the fixed effects.</p></dd>
+
+<dt>times</dt>
+<dd><p>A vector of timepoints at which the data is sampled.</p></dd>
+
+<dt>colnames</dt>
+<dd><p>A list containing the column names of the data frames.</p></dd>
+
+
+</dl></div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>The data is generated according to the following model:
+$$y_{ij} = \beta_0(t_{ij}) + \beta_1(t_{ij}) g_i + \theta_{ij} + \epsilon_{ij}$$
+where \(y_{ij}\) is the response of subject \(i\) at time \(j\) at time \((t_{ij})\),
+\(g_i\) is the group of subject \(i\),
+\(\theta_{ij}\) is the random effect of subject \(i\) at time \(j\),
+\(\epsilon_{ij}\) is the observation error of subject \(i\) at time \(j\),
+\(\beta_0(\cdot)\) is the intercept function, and \(\beta_1(\cdot)\) is the effect size.
+The random effects are generated according to a multivariate normal distribution
+with mean 0 and covariance matrix \(\Sigma\) such that \(\Sigma_{ij} = r\sigma^2\rho^{|i-j|}\)
+(\(\rho\) defined by <code>random_effect_ar1_correlation</code> and \(r\) by <code>random_effect_variance_ratio</code>).
+The observation errors are generated according to a multivariate normal distribution
+with mean 0 and covariance matrix \(\sigma^2 I\)
+(\(\sigma^2\) defined by <code>observation_variance</code>).
+The random effects and observation errors are independent.
+The response is generated according to a logistic function of time and group:
+$$f(t) = \frac{1}{1 + \exp((0.6-t)20)}$$
+The observations are then sampled uniformly at a proportion <code>prop_observed</code> of the timepoints.
+An imputed version of the data is also provided where the missing values are imputed using
+the function [refund::fpca.sc].
+The data is returned in three formats:</p><dl><dt>data</dt>
+<dd><p>A data frame containing the longitudinal data in long format.</p></dd>
+
+<dt>data_wide</dt>
+<dd><p>A data frame containing the longitudinal data in wide format.</p></dd>
+
+<dt>data_wide_imputed</dt>
+<dd><p>A data frame containing the longitudinal data in wide format with imputed missing values.</p></dd>
+
 
 </dl></div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">instance</span> <span class="op">=</span> <span class="fu">generate_synthetic_data</span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>
 
