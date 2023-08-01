@@ -26,20 +26,20 @@ Rcpp::List LSVCMM(
     std::string kernel_name, // KERNEL
     arma::rowvec &estimated_time,
     arma::vec &kernel_scale,
-    uint n_kernel_scale,
+    unsigned int n_kernel_scale,
     bool penalize_intercept, // PENALTY
     double alpha,
     double adaptive,
     arma::vec &lambda,
     double lambda_factor,
-    uint n_lambda,
+    unsigned int n_lambda,
     std::string working_covariance, // DEPENDENCY
     bool estimate_variance_components,
     double variance_ratio, // negative => proxy, i.e. log(n)
-    uint max_rounds, // CONTROL
-    uint max_iter,
+    unsigned int max_rounds, // CONTROL
+    unsigned int max_iter,
     double rel_tol,
-    uint verbose,
+    unsigned int verbose,
     std::string update_method,
     double backtracking_fraction
 ){
