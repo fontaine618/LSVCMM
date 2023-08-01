@@ -22,7 +22,6 @@ Last updated: *`r format( Sys.Date(), '%b-%d-%Y')`*
   [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/LSVCMM)](https://cran.r-project.org/package=LSVCMM)
   <!-- badges: end -->
 
-The goal of LSVCMM is to ...
 
 ## Installation
 
@@ -33,12 +32,39 @@ You can install the development version of LSVCMM from [GitHub](https://github.c
 devtools::install_github("fontaine618/LSVCMM")
 ```
 
+## Reference
+
+For details on the LSVCMM method, refer to the [Draft manuscript](bit.ly/lsvcmm).
+
 ## Example
 
 This is a basic example which shows you how to solve a common problem:
 
-```{r example}
+```{r example, results='hide'}
 library(LSVCMM)
-## basic example code
+data = generate_synthetic_data()
+fit = lsvcmm(
+  data=data$data, 
+  response="response",
+  subject="subject_id",
+  time="time",
+  vc_covariates="group",
+  kernel=list(scale=c(0.3, 0.5, 1.))
+)
+```
+
+```{r results}
+library(ggplot2)
+ggplot() + 
+  geom_line(
+    data=fit$results,
+    mapping=aes(x=penalty.lambda, y=ebich, color=as.factor(kernel.scale), group=kernel.scale)
+  ) + scale_x_log10() + 
+  theme_minimal() + labs(color="Kernel scale", x="Reg. parameter", y="EBIC")
+
+i = which.min(fit$results$ebich)
+fit$vc_path[,,i]
+data$true_values
+fit$results[i, ]
 ```
 
