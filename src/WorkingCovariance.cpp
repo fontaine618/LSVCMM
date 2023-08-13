@@ -7,7 +7,7 @@
 //[[Rcpp::depends(RcppArmadillo)]]
 
 // =============================================================================
-// Interface
+// Interface + Factory
 WorkingCovariance* WorkingCovariance::Create(
     std::string name,
     double variance_ratio,
@@ -15,6 +15,7 @@ WorkingCovariance* WorkingCovariance::Create(
     bool estimate_parameters
   ){
   if(name=="compound_symmetry") return new CompoundSymmetry(variance_ratio, 1., estimate_parameters);
+  if(name=="autoregressive") return new Autoregressive(variance_ratio, correlation, estimate_parameters);
   Rcpp::stop("unrecognized working covariance name: " + name);
 }
 
@@ -100,9 +101,6 @@ uint CompoundSymmetry::update_parameters(
     if(d[1] > 0.){
       this->variance_ratio *= (d[0] > 0.) ? 2. : 0.5; // jump somewhere else
     }else{
-      // NR step
-      // double step = -d[0] / d[1];
-      // this->variance_ratio += step;
       // logNR step
       double r = this->variance_ratio;
       double step = r*d[1]-d[0];
@@ -129,3 +127,73 @@ void CompoundSymmetry::add_to_results(Rcpp::List& results){
   results["working_covariance.ratio"] = this->variance_ratio;
   results["working_covariance.name"] = "compound_symmetry";
 }
+
+
+
+// =============================================================================
+// Autoregressive
+Autoregressive::Autoregressive(){
+  this->variance_ratio = 1.0;
+  this->correlation = 0.5;
+  this->estimate_parameters = TRUE;
+}
+Autoregressive::Autoregressive(double variance_ratio, double correlation, bool estimate_parameters){
+  this->variance_ratio = variance_ratio;
+  this->correlation = correlation;
+  this->estimate_parameters = estimate_parameters;
+}
+void Autoregressive::add_to_results(Rcpp::List& results){
+  results["working_covariance.estimate"] = this->estimate_parameters;
+  results["working_covariance.ratio"] = this->variance_ratio;
+  results["working_covariance.correlation"] = this->correlation;
+  results["working_covariance.name"] = "autoregressive";
+}
+arma::mat Autoregressive::abs_differences(const arma::colvec &time){
+  uint ni = time.n_elem;
+  arma::mat out = arma::zeros(ni, ni);
+  out.each_row() += time.t();
+  out.each_col() -= time;
+  return arma::abs(out);
+}
+std::vector<arma::mat> Autoregressive::abs_differences(const std::vector<arma::colvec> &time){
+  std::vector<arma::mat> out(time.size());
+  for(uint i=0; i<time.size(); i++) out[i] = this->abs_differences(time[i]);
+  return out;
+}
+arma::mat Autoregressive::compute_precision(const arma::colvec &time){
+  return this->compute_precision(this->abs_differences(time));
+}
+arma::mat Autoregressive::compute_precision(const arma::mat &differences){
+  uint ni = differences.n_rows;
+  arma::mat base = arma::ones(ni, ni) * this->correlation;
+  // NB: this can be made faster if regularly spaced, but we do this to have a more general algorithm
+  arma::mat out = arma::eye(ni, ni) + arma::pow(base, differences) * this->variance_ratio;
+  // base.print("correlation");
+  // differences.print("differences");
+  // out.print("V[i]");
+  return arma::inv_sympd(out);
+}
+std::vector<arma::mat> Autoregressive::compute_precision(const std::vector<arma::mat> &differences){
+  std::vector<arma::mat> out(differences.size());
+  for(uint i=0; i<differences.size(); i++) out[i] = this->compute_precision(differences[i]);
+  return out;
+}
+uint Autoregressive::update_parameters(
+    const std::vector<arma::colvec> &sr,
+    const std::vector<arma::colvec> &t,
+    const std::vector<arma::mat> &P,
+    const double dispersion,
+    Logger *logger,
+    uint round,
+    Control *control
+){
+  return 0;
+};
+std::vector<double> Autoregressive::derivatives(
+    const std::vector<arma::colvec> &sr,
+    const std::vector<arma::mat> &abs_diff,
+    const std::vector<arma::mat> &P,
+    const double dispersion
+){
+  return std::vector<double>{0., 0., 0., 0.};
+};

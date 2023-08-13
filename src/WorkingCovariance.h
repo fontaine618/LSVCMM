@@ -31,12 +31,6 @@ public:
       const std::vector<arma::mat> &P,
       const double dispersion
   );
-  virtual std::vector<double> derivatives(
-      const std::vector<arma::colvec> &sr,
-      const std::vector<arma::colvec> &t,
-      const std::vector<arma::mat> &P,
-      const double dispersion
-  ) = 0;
   virtual void add_to_results(Rcpp::List& results) = 0;
   static WorkingCovariance* Create(std::string name, double variance_ratio, double correlation, bool estimate_parameters);
 };
@@ -59,6 +53,35 @@ public:
   std::vector<double> derivatives(
       const std::vector<arma::colvec> &sr,
       const std::vector<arma::colvec> &t,
+      const std::vector<arma::mat> &P,
+      const double dispersion
+  );
+  void add_to_results(Rcpp::List& results);
+};
+
+
+class Autoregressive : public WorkingCovariance{
+public:
+  Autoregressive();
+  Autoregressive(double variance_ratio, double correlation, bool estimate_parameters);
+  using WorkingCovariance::compute_precision;
+  arma::mat compute_precision(const arma::colvec &time);
+  arma::mat compute_precision(const arma::mat &abs_diff);
+  std::vector<arma::mat> compute_precision(const std::vector<arma::mat> &abs_diff);
+  arma::mat abs_differences(const arma::colvec &time);
+  std::vector<arma::mat> abs_differences(const std::vector<arma::colvec> &time);
+  uint update_parameters(
+      const std::vector<arma::colvec> &sr,
+      const std::vector<arma::colvec> &t,
+      const std::vector<arma::mat> &P,
+      const double dispersion,
+      Logger *logger,
+      uint round,
+      Control *control
+  );
+  std::vector<double> derivatives(
+      const std::vector<arma::colvec> &sr,
+      const std::vector<arma::mat> &abs_diff,
       const std::vector<arma::mat> &P,
       const double dispersion
   );
