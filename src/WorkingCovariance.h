@@ -28,7 +28,8 @@ public:
   ) = 0;
   double profile_likelihood(
       const std::vector<arma::colvec> &sr,
-      const std::vector<arma::mat> &P
+      const std::vector<arma::mat> &P,
+      const double dispersion
   );
   virtual std::vector<double> derivatives(
       const std::vector<arma::colvec> &sr,

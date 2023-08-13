@@ -1,3 +1,10 @@
+# Version 0.0.2
+
+* Updated computation of EBIC (was previously wrong)
+* Updated computation of profile likelihood in covariance update (previously was not using dispersion)
+* Made Kernel abstract and added Epanechnikov kernel
+* Made WorkingCovariance abstract and added AR(1)
+
 # Version 0.0.1
 
 * First release

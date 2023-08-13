@@ -24,14 +24,14 @@ std::vector<arma::mat> WorkingCovariance::compute_precision(const std::vector<ar
   return out;
 }
 
-// TODO: this is a bit wrong since it does not use the dispersion
 double WorkingCovariance::profile_likelihood(
     const std::vector<arma::colvec> &sr,
-    const std::vector<arma::mat> &P
+    const std::vector<arma::mat> &P,
+    const double dispersion
 ){
   double pllk = 0.;
   for(uint i=0; i<sr.size(); i++){
-    pllk += arma::dot(sr[i], P[i] * sr[i]);
+    pllk += arma::dot(sr[i], P[i] * sr[i]) / dispersion;
     pllk -= arma::log_det_sympd(P[i]);
   }
   return -0.5 * pllk;
@@ -90,21 +90,29 @@ uint CompoundSymmetry::update_parameters(
     Control *control
 ){
   if(!this->estimate_parameters) return 0;
-  double pllk = this->profile_likelihood(sr, P);
+  double pllk = this->profile_likelihood(sr, P, dispersion);
   double pllk_prev = pllk;
   std::vector<arma::mat> Ptmp = P;
   uint iter;
   for(iter=0; iter<control->max_iter; iter++){
+    // d[0] is d/dr, d[1] is d^2/dr^2
     std::vector<double> d = this->derivatives(sr, t, Ptmp, dispersion);
     if(d[1] > 0.){
       this->variance_ratio *= (d[0] > 0.) ? 2. : 0.5; // jump somewhere else
     }else{
-      double step = -d[0] / d[1];
-      this->variance_ratio += step;
+      // NR step
+      // double step = -d[0] / d[1];
+      // this->variance_ratio += step;
+      // logNR step
+      double r = this->variance_ratio;
+      double step = r*d[1]-d[0];
+      step = 1. / step;
+      step = -r*r*d[0]*step;
+      this->variance_ratio *= exp(step);
     }
     this->variance_ratio = fmax(this->variance_ratio, 1e-6);
     Ptmp = this->compute_precision(t);
-    pllk = this->profile_likelihood(sr, Ptmp);
+    pllk = this->profile_likelihood(sr, Ptmp, dispersion);
     logger->add_variance_iteration_results(round, iter, pllk);
     if(control->verbose > 2) Rcpp::Rcout << "          " << round <<".V." << iter <<
       " obj=" << pllk << "\n";
