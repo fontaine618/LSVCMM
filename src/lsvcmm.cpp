@@ -68,7 +68,7 @@ Rcpp::List LSVCMM(
   // else Rcpp::stop("Kernel not implemented");
   // Rcpp::Rcout << "         Kernel: " << typeid(kernel).name() << "\n";
   // data.W = kernel->eval(estimated_time, data.t);
-  Kernel* kernel = new Kernel();
+  Kernel* kernel = Kernel::Create(kernel_name);
 
   if(control->verbose) Rcpp::Rcout << "[LSVCMM] Initializing family. family_name=" << family_name << "\n";
   // Family* family = NULL;

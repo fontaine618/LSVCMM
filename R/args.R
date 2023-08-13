@@ -30,7 +30,7 @@ family_args = function(args){
 
 # ==============================================================================
 DEFAULT_KERNEL_ARGS = list(name="gaussian", scale=NULL, n_scale=11L)
-IMPLEMENTED_KERNELS = c("gaussian")
+IMPLEMENTED_KERNELS = c("gaussian", "epa")
 
 
 #' Prepare kernel arguments
