@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-Last updated: *Aug-01-2023*
+Last updated: *Aug-12-2023*
 
 # LSVCMM
 
@@ -58,25 +58,38 @@ ggplot() +
 
 i = which.min(fit$results$ebich)
 fit$vc_path[,,i]
-#>             [,1]        [,2]       [,3]        [,4]        [,5]        [,6]
-#> [1,] -0.06224119 -0.07737476 -0.0875152 -0.09274494 -0.09389309 -0.09237971
-#> [2,]  0.00000000  0.00000000  0.0000000  0.00000000  0.00000000  0.10615007
-#>             [,7]        [,8]        [,9]       [,10]      [,11]
-#> [1,] -0.08995033 -0.08835181 -0.08901332 -0.09279479 -0.0998499
-#> [2,]  0.48351439  0.80429355  1.01417988  1.06646627  0.9379095
+#>             [,1]        [,2]       [,3]       [,4]       [,5]       [,6]
+#> [1,] -0.05392229 -0.07821785 -0.0979816 -0.1124308 -0.1214756 -0.1256716
+#> [2,]  0.00000000  0.00000000  0.0000000  0.0000000  0.0277699  0.1815235
+#>            [,7]       [,8]       [,9]      [,10]      [,11]
+#> [1,] -0.1260648 -0.1239628 -0.1206807 -0.1173126 -0.1145710
+#> [2,]  0.5833630  0.9045200  1.0915827  1.1004405  0.9117964
+data$true_values
+#>    time b0        b1
+#> 1   0.0  0 0.0000000
+#> 2   0.1  0 0.0000000
+#> 3   0.2  0 0.0000000
+#> 4   0.3  0 0.0000000
+#> 5   0.4  0 0.0000000
+#> 6   0.5  0 0.1192029
+#> 7   0.6  0 0.5000000
+#> 8   0.7  0 0.8807971
+#> 9   0.8  0 0.9820138
+#> 10  0.9  0 0.9975274
+#> 11  1.0  0 0.9996646
 fit$results[i, ]
 #>           llk      rss family.dispersion family.name
-#> 227 -1273.265 1088.203          1.452874    gaussian
+#> 234 -1272.443 1085.661          1.449481    gaussian
 #>                    penalty.name penalty.alpha penalty.lambda penalty.adaptive
-#> 227 adaptive_sparse_group_lasso             1       3.006175                0
+#> 234 adaptive_sparse_group_lasso             1       1.844561                0
 #>     penalty.penalize_intercept link_function.name working_covariance.estimate
-#> 227                      FALSE           identity                        TRUE
+#> 234                      FALSE           identity                        TRUE
 #>     working_covariance.ratio working_covariance.name kernel.name kernel.scale
-#> 227                0.4226973       compound_symmetry    gaussian            1
+#> 234                0.4232983       compound_symmetry    gaussian            1
 #>     control.max_iter control.max_rounds control.rel_tol control.verbose
-#> 227             1000                 50           1e-06               1
+#> 234             1000                 50           1e-06               1
 #>     control.update_method control.backtracking_fraction df df_kernel  df_logn
-#> 227                  BPGD                           0.9 17  1.545455 99.81993
+#> 234                  BPGD                           0.9 18  1.636364 105.7625
 #>     df_logn_kernel df_max      aic     aich      bic     bich     ebic    ebich
-#> 227       9.074539     22 2580.531 2549.622 2646.351 2555.605 3020.351 2589.605
+#> 234       9.614768     22 2580.886 2548.159 2650.649 2554.501 2706.288 2559.559
 ```

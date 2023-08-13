@@ -373,9 +373,9 @@ void Model::prepare_ics(const Data &data){
   results["bic"] = -2 * (double)results["llk"] + (double)results["df_logn"];
   results["bich"] = -2 * (double)results["llk"] + (double)results["df_logn_kernel"];
   results["ebic"] = -2 * (double)results["llk"] + (double)results["df_logn"] +
-    (double)results["df"] * (double)results["df_max"];
+    (double)results["df"] * log((double)results["df_max"]);
   results["ebich"] = -2 * (double)results["llk"] + (double)results["df_logn_kernel"] +
-    (double)results["df_kernel"] * (double)results["df_max"];
+    (double)results["df_kernel"] * log((double)results["df_max"]);
 }
 
 Rcpp::List Model::save(){
