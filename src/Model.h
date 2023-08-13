@@ -41,7 +41,7 @@ public:
 
   Kernel *kernel;
   Penalty *penalty;
-  CompoundSymmetry *workingCovariance;
+  WorkingCovariance *workingCovariance;
   Identity *linkFunction;
   Gaussian *family;
   Control *control;
@@ -55,7 +55,7 @@ public:
     uint pu,
     arma::rowvec estimated_time,
     Penalty* penalty,
-    CompoundSymmetry* workingCovariance,
+    WorkingCovariance* workingCovariance,
     Identity* linkFunction,
     Gaussian* family,
     Kernel* kernel,

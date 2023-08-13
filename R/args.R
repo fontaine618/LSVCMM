@@ -107,8 +107,8 @@ penalty_args = function(args){
 }
 
 # ==============================================================================
-DEFAULT_WORKING_COVARIANCE_ARGS = list(name="compound_symmetry", estimate=T, ratio=-1)
-IMPLEMENTED_WORKING_COVARIANCES = c("compound_symmetry")
+DEFAULT_WORKING_COVARIANCE_ARGS = list(name="compound_symmetry", estimate=T, ratio=-1, correlation=0.5)
+IMPLEMENTED_WORKING_COVARIANCES = c("compound_symmetry", "autoregressive")
 
 #' Prepare working covariance arguments
 #'
@@ -121,6 +121,7 @@ IMPLEMENTED_WORKING_COVARIANCES = c("compound_symmetry")
 #' \item{\code{estimate}}{Whether to estimate the parameters. Must be \code{TRUE} (default) or \code{FALSE}.}
 #' \item{\code{ratio}}{The ratio of the variance of the random effects to the variance of the error term.
 #' If negative (default), the ratio is estimated to `log(n)`.}
+#' \item{\code{correlation}}{The correlation for AR(1).}
 #' }
 #'
 #' @return A list of arguments

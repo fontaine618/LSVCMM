@@ -95,6 +95,7 @@ lsvcmm = function(
 
     working_covariance=working_covariance$name,
     estimate_variance_components=working_covariance$estimate,
+    correlation=working_covariance$correlation,
     variance_ratio=working_covariance$ratio,
 
     max_rounds=control$max_rounds,

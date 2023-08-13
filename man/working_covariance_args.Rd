@@ -16,11 +16,5 @@ A list of arguments
 Prepare working covariance arguments
 }
 \details{
-The following arguments are supported:
-\describe{
-\item{\code{name}}{The working covariance function. Currently, only \code{"compound_symmetry"} is supported.}
-\item{\code{estimate}}{Whether to estimate the parameters. Must be \code{TRUE} (default) or \code{FALSE}.}
-\item{\code{ratio}}{The ratio of the variance of the random effects to the variance of the error term.
-If negative (default), the ratio is estimated to `log(n)`.}
-}
+
 }

@@ -6,39 +6,26 @@
 
 //[[Rcpp::depends(RcppArmadillo)]]
 
-
-std::vector<arma::mat> CompoundSymmetry::compute_covariance(const std::vector<arma::colvec> &time){
-  std::vector<arma::mat> out(time.size());
-  for(uint i=0; i<time.size(); i++) out[i] = this->compute_covariance(time[i]);
-  return out;
+// =============================================================================
+// Interface
+WorkingCovariance* WorkingCovariance::Create(
+    std::string name,
+    double variance_ratio,
+    double correlation,
+    bool estimate_parameters
+  ){
+  if(name=="compound_symmetry") return new CompoundSymmetry(variance_ratio, 1., estimate_parameters);
+  Rcpp::stop("unrecognized working covariance name: " + name);
 }
-std::vector<arma::mat> CompoundSymmetry::compute_precision(const std::vector<arma::colvec> &time){
+
+std::vector<arma::mat> WorkingCovariance::compute_precision(const std::vector<arma::colvec> &time){
   std::vector<arma::mat> out(time.size());
   for(uint i=0; i<time.size(); i++) out[i] = this->compute_precision(time[i]);
   return out;
 }
 
-CompoundSymmetry::CompoundSymmetry(){}
-
-CompoundSymmetry::CompoundSymmetry(double variance_ratio, bool estimate_parameters){
-  this->variance_ratio = variance_ratio;
-  this->estimate_parameters = estimate_parameters;
-}
-
-arma::mat CompoundSymmetry::compute_covariance(const arma::colvec &time){
-  arma::mat out = arma::eye(time.n_elem, time.n_elem);
-  out += this->variance_ratio;
-  return out;
-}
-
-arma::mat CompoundSymmetry::compute_precision(const arma::colvec &time){
-  uint ni = time.n_elem;
-  arma::mat out = arma::eye(ni, ni);
-  out -= 1.0/(ni + 1.0/this->variance_ratio);
-  return out;
-}
-
-double CompoundSymmetry::profile_likelihood(
+// TODO: this is a bit wrong since it does not use the dispersion
+double WorkingCovariance::profile_likelihood(
     const std::vector<arma::colvec> &sr,
     const std::vector<arma::mat> &P
 ){
@@ -50,8 +37,29 @@ double CompoundSymmetry::profile_likelihood(
   return -0.5 * pllk;
 }
 
+// =============================================================================
+// Compound Symmetry
+CompoundSymmetry::CompoundSymmetry(){
+  this->variance_ratio = 1.0;
+  this->correlation = 1.0;
+  this->estimate_parameters = TRUE;
+}
+CompoundSymmetry::CompoundSymmetry(double variance_ratio, double correlation, bool estimate_parameters){
+  this->variance_ratio = variance_ratio;
+  this->correlation = correlation;
+  this->estimate_parameters = estimate_parameters;
+}
+
+arma::mat CompoundSymmetry::compute_precision(const arma::colvec &time){
+  uint ni = time.n_elem;
+  arma::mat out = arma::eye(ni, ni);
+  out -= 1.0/(ni + 1.0/this->variance_ratio);
+  return out;
+}
+
 std::vector<double> CompoundSymmetry::derivatives(
     const std::vector<arma::colvec> &sr,
+    const std::vector<arma::colvec> &t,
     const std::vector<arma::mat> &P,
     const double dispersion
 ){
@@ -59,18 +67,6 @@ std::vector<double> CompoundSymmetry::derivatives(
   double d2 = 0.;
   for(uint i=0; i<sr.size(); i++){
     uint ni = sr[i].n_elem;
-    // arma::mat dV1 = arma::mat(ni, ni, arma::fill::ones);
-    // arma::mat dV2 = arma::mat(ni, ni, arma::fill::zeros);
-    // arma::mat dP1 = -P[i] * dV1 * P[i];
-    // arma::mat PdV1 = P[i] * dV1;
-    // arma::mat PdV2 = P[i] * dV2;
-    // arma::mat dP1dV1 = dP1 * dV1;
-    // arma::mat dP2 = - dP1dV1 * P[i] - PdV2 * P[i] - PdV1 * dP1;
-    // d1 += arma::trace(PdV1);
-    // d1 += - arma::dot(sr[i], dP1 * sr[i]);
-    // d2 += arma::trace(dP1dV1);
-    // d2 += arma::trace(PdV2);
-    // d2 += arma::dot(sr[i], dP2 * sr[i]);
     arma::mat dV = arma::mat(ni, ni, arma::fill::ones);
     arma::mat PdV = P[i] * dV;
     arma::mat PdVPsr = PdV * P[i] * sr[i];
@@ -99,7 +95,7 @@ uint CompoundSymmetry::update_parameters(
   std::vector<arma::mat> Ptmp = P;
   uint iter;
   for(iter=0; iter<control->max_iter; iter++){
-    std::vector<double> d = this->derivatives(sr, Ptmp, dispersion);
+    std::vector<double> d = this->derivatives(sr, t, Ptmp, dispersion);
     if(d[1] > 0.){
       this->variance_ratio *= (d[0] > 0.) ? 2. : 0.5; // jump somewhere else
     }else{
@@ -117,7 +113,6 @@ uint CompoundSymmetry::update_parameters(
     }
     pllk_prev = pllk;
   }
-  // FIXME: precision update is not stored, need to redo it outside
   return iter;
 }
 

@@ -17,7 +17,7 @@ Model::Model(
   uint pu,
   arma::rowvec estimated_time,
   Penalty* penalty,
-  CompoundSymmetry* workingCovariance,
+  WorkingCovariance* workingCovariance,
   Identity* linkFunction,
   Gaussian* family,
   Kernel* kernel,
