@@ -3,16 +3,15 @@
 
 // [[Rcpp::depends(RcppArmadillo)]]
 
-#ifndef GaussianKernel_hpp
-#define GaussianKernel_hpp
+#ifndef Kernel_hpp
+#define Kernel_hpp
 
-// class GaussianKernel : public Kernel{
-class GaussianKernel{
+class Kernel{
 
 public:
 
   double scale, eval0;
-  GaussianKernel();
+  Kernel();
   // using Kernel::eval;
   arma::mat eval(const arma::rowvec &t0, const arma::colvec &t1);
   std::vector<arma::mat> eval(const std::vector<arma::rowvec> &t0, const arma::colvec &t1);

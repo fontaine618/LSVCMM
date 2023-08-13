@@ -1,6 +1,6 @@
 #include "RcppArmadillo.h"
 #include "Data.h"
-#include "GaussianKernel.h"
+#include "Kernel.h"
 #include "LinkFunction.cpp"
 #include "Family.h"
 #include "WorkingCovariance.h"
@@ -20,7 +20,7 @@ Model::Model(
   CompoundSymmetry* workingCovariance,
   Identity* linkFunction,
   Gaussian* family,
-  GaussianKernel* kernel,
+  Kernel* kernel,
   Control* control
 ){
   this->px = px;

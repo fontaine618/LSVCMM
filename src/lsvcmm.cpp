@@ -1,6 +1,6 @@
 #include "RcppArmadillo.h"
 #include "Data.h"
-#include "GaussianKernel.h"
+#include "Kernel.h"
 #include "LinkFunction.cpp"
 #include "Family.h"
 #include "WorkingCovariance.h"
@@ -68,7 +68,7 @@ Rcpp::List LSVCMM(
   // else Rcpp::stop("Kernel not implemented");
   // Rcpp::Rcout << "         Kernel: " << typeid(kernel).name() << "\n";
   // data.W = kernel->eval(estimated_time, data.t);
-  GaussianKernel* kernel = new GaussianKernel();
+  Kernel* kernel = new Kernel();
 
   if(control->verbose) Rcpp::Rcout << "[LSVCMM] Initializing family. family_name=" << family_name << "\n";
   // Family* family = NULL;

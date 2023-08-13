@@ -1,6 +1,6 @@
 #include "RcppArmadillo.h"
 #include "Data.h"
-#include "GaussianKernel.h"
+#include "Kernel.h"
 #include "LinkFunction.cpp"
 #include "Family.h"
 #include "WorkingCovariance.h"
@@ -39,7 +39,7 @@ public:
 
   Rcpp::List results = Rcpp::List::create();
 
-  GaussianKernel *kernel;
+  Kernel *kernel;
   Penalty *penalty;
   CompoundSymmetry *workingCovariance;
   Identity *linkFunction;
@@ -58,7 +58,7 @@ public:
     CompoundSymmetry* workingCovariance,
     Identity* linkFunction,
     Gaussian* family,
-    GaussianKernel* kernel,
+    Kernel* kernel,
     Control* control
   );
 
