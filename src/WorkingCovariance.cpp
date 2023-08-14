@@ -98,17 +98,17 @@ uint CompoundSymmetry::update_parameters(
   for(iter=0; iter<control->max_iter; iter++){
     // d[0] is d/dr, d[1] is d^2/dr^2
     std::vector<double> d = this->derivatives(sr, t, Ptmp, dispersion);
+    // log NR step for variance ratio
+    double r = this->variance_ratio;
     if(d[1] > 0.){
       this->variance_ratio *= (d[0] > 0.) ? 2. : 0.5; // jump somewhere else
     }else{
-      // logNR step
-      double r = this->variance_ratio;
-      double step = r*d[1]-d[0];
-      step = 1. / step;
-      step = -r*r*d[0]*step;
-      this->variance_ratio *= exp(step);
+      double step = r*r*d[1] + d[0]*r;
+      step = -r*d[0] / step;
+      r *= exp(step);
     }
-    this->variance_ratio = fmax(this->variance_ratio, 1e-6);
+    this->variance_ratio = fmax(r, 1e-6);
+    // check convergence
     Ptmp = this->compute_precision(t);
     pllk = this->profile_likelihood(sr, Ptmp, dispersion);
     logger->add_variance_iteration_results(round, iter, pllk);
@@ -187,7 +187,49 @@ uint Autoregressive::update_parameters(
     uint round,
     Control *control
 ){
-  return 0;
+  if(!this->estimate_parameters) return 0;
+  double pllk = this->profile_likelihood(sr, P, dispersion);
+  double pllk_prev = pllk;
+  std::vector<arma::mat> Ptmp = P;
+  std::vector<arma::mat> abs_diff = this->abs_differences(t);
+  uint iter;
+  for(iter=0; iter<control->max_iter; iter++){
+    // d[0] is d/dr, d[1] is d^2/dr^2
+    // d[2] is d/dc, d[3] is d^2/dc^2
+    std::vector<double> d = this->derivatives(sr, abs_diff, Ptmp, dispersion);
+    // log NR step for variance ratio
+    double r = this->variance_ratio;
+    if(d[1] > 0.){
+      this->variance_ratio *= (d[0] > 0.) ? 2. : 0.5; // jump somewhere else
+    }else{
+      double step = r*r*d[1] + d[0]*r;
+      step = -r*d[0] / step;
+      r *= exp(step);
+    }
+    this->variance_ratio = fmax(r, 1e-6);
+    // 1-log(-x) NR step for correlation
+    // double c = this->correlation;
+    // if(d[3] > 0.){
+    //   this->correlation = (d[2] > 0.) ? 0.5+c/2. : c/2.; // jump somewhere else
+    // }else{
+    //   double step = (1.-c)*(1.-c)*d[3] - d[2];
+    //   step = d[2]*(1.-c) / step;
+    //   c = -log(1.-c) - step;
+    //   c = 1. - exp(-c);
+    //   this->correlation = fmin(fmax(c, 1e-6), 1.);
+    // }
+    // check convergence
+    Ptmp = this->compute_precision(abs_diff);
+    pllk = this->profile_likelihood(sr, Ptmp, dispersion);
+    logger->add_variance_iteration_results(round, iter, pllk);
+    if(control->verbose > 2) Rcpp::Rcout << "          " << round <<".V." << iter <<
+      " obj=" << pllk << "\n";
+    if(fabs(pllk - pllk_prev) / fabs(pllk) < control->rel_tol) {
+      break;
+    }
+    pllk_prev = pllk;
+  }
+  return iter;
 };
 std::vector<double> Autoregressive::derivatives(
     const std::vector<arma::colvec> &sr,
@@ -195,5 +237,38 @@ std::vector<double> Autoregressive::derivatives(
     const std::vector<arma::mat> &P,
     const double dispersion
 ){
-  return std::vector<double>{0., 0., 0., 0.};
+  double dr1 = 0.;
+  double dr2 = 0.;
+  double dc1 = 0.;
+  double dc2 = 0.;
+  double c = this->correlation;
+  double r = this->variance_ratio;
+  for(uint i=0; i<sr.size(); i++){
+    uint ni = sr[i].n_elem;
+    arma::mat ctd = arma::pow(arma::ones(ni, ni) * c, abs_diff[i]);
+    // ratio
+    arma::mat dV = ctd;
+    arma::mat PdV = P[i] * dV;
+    arma::mat PdVPsr = PdV * P[i] * sr[i];
+    double d1tr = arma::trace(PdV);
+    double d1ip = arma::dot(sr[i], PdVPsr);
+    double d2tr = arma::trace(PdV * PdV);
+    double d2ip = arma::dot(sr[i], PdV * PdVPsr);
+    dr1 += d1tr - d1ip / dispersion;
+    dr2 += -d2tr + 2. * d2ip / dispersion;
+    // // correlation
+    // dV = ctd * (r*log(c));
+    // arma::mat dV2 = ctd * (r*log(c)*log(c) + r/c);
+    // PdV = P[i] * dV;
+    // arma::mat PdV2 = P[i] * dV2;
+    // PdVPsr = PdV * P[i] * sr[i];
+    // d1tr = arma::trace(PdV);
+    // d1ip = arma::dot(sr[i], PdVPsr);
+    // d2tr = arma::trace(- PdV * PdV + PdV2);
+    // d2ip = 2.* arma::dot(sr[i], PdV * PdVPsr);
+    // d2ip += - arma::dot(sr[i], PdV2 * P[i] * sr[i]);
+    // dr1 += d1tr - d1ip / dispersion;
+    // dr2 += d2tr + d2ip / dispersion;
+  }
+  return std::vector<double>{-0.5 * dr1, -0.5 * dr2, -0.5 * dc1, -0.5 * dc2};
 };
