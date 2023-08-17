@@ -4,6 +4,7 @@
 * Updated computation of profile likelihood in covariance update (previously was not using dispersion)
 * Made Kernel abstract and added Epanechnikov kernel
 * Made WorkingCovariance abstract and added AR(1)
+* Currently AR(1) estimation doesnt work well
 
 # Version 0.0.1
 
