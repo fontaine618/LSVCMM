@@ -79,7 +79,28 @@ public:
       uint round,
       Control *control
   );
+  uint update_parameters_old(
+      const std::vector<arma::colvec> &sr,
+      const std::vector<arma::colvec> &t,
+      const std::vector<arma::mat> &P,
+      const double dispersion,
+      Logger *logger,
+      uint round,
+      Control *control
+  );
   std::vector<double> derivatives(
+      const std::vector<arma::colvec> &sr,
+      const std::vector<arma::mat> &abs_diff,
+      const std::vector<arma::mat> &P,
+      const double dispersion
+  );
+  std::vector<double> derivatives_variance_ratio(
+      const std::vector<arma::colvec> &sr,
+      const std::vector<arma::mat> &abs_diff,
+      const std::vector<arma::mat> &P,
+      const double dispersion
+  );
+  std::vector<double> derivatives_correlation(
       const std::vector<arma::colvec> &sr,
       const std::vector<arma::mat> &abs_diff,
       const std::vector<arma::mat> &P,

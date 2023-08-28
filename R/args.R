@@ -148,7 +148,7 @@ DEFAULT_CONTROL_ARGS = list(max_rounds=50, max_iter=1000, rel_tol=1e-6, verbose=
 #' \item{\code{max_iter}}{The maximum number of iterations per round (default: 1000.)}
 #' \item{\code{rel_tol}}{The relative tolerance for convergence (default: \code{1e-6}.)}
 #' \item{\code{verbose}}{The verbosity level. Must be 0, 1(default), 2, or 3.}
-#' \item{\code{update_method}}{The update method. Must be \code{"PGD"} or \code{"BPGD"}. Currently overwritten.}
+#' \item{\code{update_method}}{The update method. Currently, only \code{"PGD"} is allowed.}
 #' \item{\code{backtracking_fraction}}{The backtracking fraction. Must be between 0 and 1 (default: \code{0.9}.)}
 #' \item{\code{...}}{Additional arguments. Currently ignored.}
 #' }
@@ -162,7 +162,7 @@ control_args = function(args){
   stopifnot(out[["max_iter"]] > 0)
   stopifnot(out[["rel_tol"]] > 0)
   stopifnot(out[["verbose"]] %in% c(0, 1, 2, 3))
-  stopifnot(out[["update_method"]] %in% c("PGD", "BPGD"))
+  stopifnot(out[["update_method"]] %in% c("PGD"))
   stopifnot(out[["backtracking_fraction"]] > 0 & out[["backtracking_fraction"]] < 1)
   return(out)
 }

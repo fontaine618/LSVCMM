@@ -162,7 +162,7 @@ void Model::backtracking_proximal_gradient_step(Data &data){
     if(this->control->verbose > 2) Rcpp::Rcout << "         Backtracking iteration: " << iter <<
                                     " LHS=" << LHS << " RHS=" << RHS <<
                                     " ssB=" << this->ssB << std::endl;
-    if(LHS <= RHS) break;
+    if(LHS <= RHS + this->control->rel_tol*fabs(RHS)) break;
   }
 
   // NB: selected proposal already stored in a and B
@@ -193,12 +193,6 @@ arma::mat Model::hessian(const Data &data){
 
   // FIXME: not sure if this is correct for non-identity link?
   // should there be a second term?
-
-  // FIXME: this is also incorrect that it skips the cross terms in B
-  // which should be the HBB bith with different weights on either sides
-
-  // For the purpose of finding a Lipschitz bound I think this is fine
-
 
   uint dim = data.pu + data.px * this->nt;
   arma::mat H = arma::mat(dim, dim, arma::fill::zeros);
@@ -239,6 +233,7 @@ void Model::prepare_stepsize(Data &data){
   double La = 0.;
   if(data.pu > 0) La = arma::eig_sym(Haa).max();
 
+  // arma::eig_sym(HBB).print("Evals HBB");
   double LB = arma::eig_sym(HBB).max();
 
   // Heuristic might be a little small, increase until fine
@@ -273,9 +268,9 @@ double Model::lambda_max(Data &data){
 }
 
 void Model::fit(Data &data){
-  // hack for the moment
-  if(this->kernel->scale > 0.5) this->control->update_method = "BPGD";
-  else this->control->update_method = "PGD";
+  // // hack for the moment
+  // if(this->kernel->scale > 0.5) this->control->update_method = "BPGD";
+  // else this->control->update_method = "PGD";
 
   this->logger->reset();
   this->momentum = 1.;
@@ -285,6 +280,8 @@ void Model::fit(Data &data){
   this->update_mean(data);
   double quad_term = this->quadratic_term(data);
   double penalty_term = this->penalty->eval(this->B);
+  double objective = 0.5*quad_term + penalty_term;
+  double objective_old = objective;
   double ld_scaling = this->logdet_scaling(data);
   double ld_precision = this->logdet_precision(data);
   double ld_dispersion = this->logdet_dispersion(data);
@@ -293,8 +290,8 @@ void Model::fit(Data &data){
     ld_scaling + ld_dispersion - ld_precision
   );
   double llk_old = llk;
-  this->reset_stepsize();
   for(uint round=0; round<this->control->max_rounds; round++){
+    this->reset_stepsize();
     double quad_term_old = quad_term;
     uint mean_iter;
     for(mean_iter=0; mean_iter<this->control->max_iter; mean_iter++){
@@ -306,13 +303,20 @@ void Model::fit(Data &data){
       this->update_mean(data); // needs to be done after updating
       quad_term = this->quadratic_term(data);
       penalty_term = this->penalty->eval(this->B);
-      this->logger->add_mean_iteration_results(round, mean_iter, 0.5*quad_term + penalty_term);
+      objective = 0.5*quad_term + penalty_term;
+      this->logger->add_mean_iteration_results(round, mean_iter, objective);
       if(fabs(quad_term - quad_term_old) / fabs(quad_term_old)< this->control->rel_tol){
         if(this->control->verbose > 2) Rcpp::Rcout << "         " << round << "." << "M" <<
           "." << mean_iter << ": obj=" << quad_term << "\n";
         break;
       }
       quad_term_old = quad_term;
+      if(objective > objective_old){
+        // Rcpp::Rcout << "         Objective increased\n";
+        this->ssa *= this->control->backtracking_fraction;
+        this->ssB *= this->control->backtracking_fraction;
+      };
+      objective_old = objective;
     }
     // variance update: mean should already be up to date
     uint variance_iter = this->workingCovariance->update_parameters(

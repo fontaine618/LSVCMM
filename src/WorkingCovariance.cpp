@@ -179,7 +179,7 @@ std::vector<arma::mat> Autoregressive::compute_precision(const std::vector<arma:
   for(uint i=0; i<differences.size(); i++) out[i] = this->compute_precision(differences[i]);
   return out;
 }
-uint Autoregressive::update_parameters(
+uint Autoregressive::update_parameters_old(
     const std::vector<arma::colvec> &sr,
     const std::vector<arma::colvec> &t,
     const std::vector<arma::mat> &P,
@@ -218,6 +218,7 @@ uint Autoregressive::update_parameters(
       // step = d[2]*(1.-c) / step;
       // c = -log(1.-c) - step;
       // c = 1. - exp(-c);
+      Rcpp::Rcout << "corr=" << c << " ratio=" << this->variance_ratio << " d2=" << d[3] << " d1=" << d[2] << "\n";
       c -= d[2] / d[3];
     }
     this->correlation = fmin(fmax(c, 1e-2), 1.-1e-2);
@@ -234,6 +235,65 @@ uint Autoregressive::update_parameters(
   }
   return iter;
 };
+
+
+uint Autoregressive::update_parameters(
+    const std::vector<arma::colvec> &sr,
+    const std::vector<arma::colvec> &t,
+    const std::vector<arma::mat> &P,
+    const double dispersion,
+    Logger *logger,
+    uint round,
+    Control *control
+){
+  if(!this->estimate_parameters) return 0;
+  double pllk = this->profile_likelihood(sr, P, dispersion);
+  double pllk_prev = pllk;
+  std::vector<double> d;
+  std::vector<arma::mat> Ptmp = P;
+  std::vector<arma::mat> abs_diff = this->abs_differences(t);
+  uint iter;
+  for(iter=0; iter<control->max_iter; iter++){
+
+    // update correlation
+    d = this->derivatives_correlation(sr, abs_diff, Ptmp, dispersion);
+    double c = this->correlation;
+    if(d[1] > 0.){
+      this->correlation = (d[0] > 0.) ? 0.5+c/2. : c/2.;
+    }else{
+      c -= d[0] / d[1];
+    }
+    this->correlation = fmin(fmax(c, 1e-2), 1.-1e-2);
+    Ptmp = this->compute_precision(abs_diff);
+    Rcpp::Rcout << "corr=" << this->correlation << " d2=" << d[1] << " d1=" << d[0] << "\n";
+
+    // update variance ratio
+    d = this->derivatives_variance_ratio(sr, abs_diff, Ptmp, dispersion);
+    double r = this->variance_ratio;
+    if(d[1] > 0.){
+      r *= (d[0] > 0.) ? 2. : 0.5;
+    }else{
+      r -= d[0] / d[1];
+    }
+    // this->variance_ratio = fmax(r, 1e-6);
+    Rcpp::Rcout << "ratio=" << this->variance_ratio << " d2=" << d[1] << " d1=" << d[0] << "\n";
+
+    // check convergence
+    d = this->derivatives_variance_ratio(sr, abs_diff, Ptmp, dispersion);
+    pllk = this->profile_likelihood(sr, Ptmp, dispersion);
+    logger->add_variance_iteration_results(round, iter, pllk);
+    if(control->verbose > 2) Rcpp::Rcout << "          " << round <<".V." << iter <<
+      " obj=" << pllk << "\n";
+    if(fabs(pllk - pllk_prev) / fabs(pllk) < control->rel_tol) {
+      break;
+    }
+    pllk_prev = pllk;
+  }
+  return iter;
+};
+
+
+
 std::vector<double> Autoregressive::derivatives(
     const std::vector<arma::colvec> &sr,
     const std::vector<arma::mat> &abs_diff,
@@ -275,4 +335,73 @@ std::vector<double> Autoregressive::derivatives(
     dc2 += d2tr + d2ip / dispersion;
   }
   return std::vector<double>{-0.5 * dr1, -0.5 * dr2, -0.5 * dc1, -0.5 * dc2};
+};
+
+
+
+
+std::vector<double> Autoregressive::derivatives_variance_ratio(
+    const std::vector<arma::colvec> &sr,
+    const std::vector<arma::mat> &abs_diff,
+    const std::vector<arma::mat> &P,
+    const double dispersion
+){
+  double dr1 = 0.;
+  double dr2 = 0.;
+  double c = this->correlation;
+  double r = this->variance_ratio;
+  for(uint i=0; i<sr.size(); i++){
+    uint ni = sr[i].n_elem;
+    arma::mat ctd = arma::pow(arma::ones(ni, ni) * c, abs_diff[i]);
+    // ratio
+    arma::mat dV = ctd;
+    arma::mat PdV = P[i] * dV;
+    arma::mat Psr = P[i] * sr[i];
+    arma::mat PdVPsr = PdV * Psr;
+    double d1tr = arma::trace(PdV);
+    double d1ip = arma::dot(sr[i], PdVPsr);
+    double d2tr = - arma::trace(PdV * PdV);
+    double d2ip = 2.* arma::dot(sr[i], PdV * PdVPsr);
+    dr1 += d1tr - d1ip / dispersion;
+    dr2 += d2tr + d2ip / dispersion;
+  }
+  return std::vector<double>{-0.5 * dr1, -0.5 * dr2};
+};
+
+
+
+
+std::vector<double> Autoregressive::derivatives_correlation(
+    const std::vector<arma::colvec> &sr,
+    const std::vector<arma::mat> &abs_diff,
+    const std::vector<arma::mat> &P,
+    const double dispersion
+){
+  double dc1 = 0.;
+  double dc2 = 0.;
+  double c = this->correlation;
+  double r = this->variance_ratio;
+  for(uint i=0; i<sr.size(); i++){
+    uint ni = sr[i].n_elem;
+    arma::mat ctd = arma::pow(arma::ones(ni, ni) * c, abs_diff[i]);
+    // ratio
+    arma::mat dV = ctd;
+    arma::mat PdV = P[i] * dV;
+    arma::mat Psr = P[i] * sr[i];
+    arma::mat PdVPsr = PdV * Psr;
+    // correlation
+    dV *= log(c) * r;
+    PdV *= log(c) * r;
+    PdVPsr *= log(c) * r;
+    arma::mat dV2 = ctd * (r*log(c)*log(c) + r/c);
+    arma::mat PdV2 = P[i] * dV2;
+    double d1tr = arma::trace(PdV);
+    double d1ip = arma::dot(sr[i], PdVPsr);
+    double d2tr = arma::trace(- PdV * PdV + PdV2);
+    double d2ip = 2.* arma::dot(sr[i], PdV * PdVPsr);
+    d2ip += - arma::dot(sr[i], PdV2 * Psr);
+    dc1 += d1tr - d1ip / dispersion;
+    dc2 += d2tr + d2ip / dispersion;
+  }
+  return std::vector<double>{-0.5 * dc1, -0.5 * dc2};
 };
