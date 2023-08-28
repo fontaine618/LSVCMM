@@ -14,7 +14,8 @@ WorkingCovariance* WorkingCovariance::Create(
     double correlation,
     bool estimate_parameters
   ){
-  if(name=="compound_symmetry") return new CompoundSymmetry(variance_ratio, 1., estimate_parameters);
+  if(name=="independent") return new Independent();
+  if(name=="compound_symmetry") return new CompoundSymmetry(variance_ratio, estimate_parameters);
   if(name=="autoregressive") return new Autoregressive(variance_ratio, correlation, estimate_parameters);
   Rcpp::stop("unrecognized working covariance name: " + name);
 }
@@ -39,15 +40,48 @@ double WorkingCovariance::profile_likelihood(
 }
 
 // =============================================================================
+// Independent
+Independent::Independent(){
+  this->variance_ratio = 0.0;
+  this->correlation = 0.0;
+  this->estimate_parameters = FALSE;
+}
+
+arma::mat Independent::compute_precision(const arma::colvec &time){
+  uint ni = time.n_elem;
+  arma::mat out = arma::eye(ni, ni);
+  return out;
+}
+
+uint Independent::update_parameters(
+    const std::vector<arma::colvec> &sr,
+    const std::vector<arma::colvec> &t,
+    const std::vector<arma::mat> &P,
+    const double dispersion,
+    Logger* logger,
+    uint round,
+    Control *control
+){
+  return 0;
+}
+
+void Independent::add_to_results(Rcpp::List& results){
+  results["working_covariance.name"] = "independent";
+}
+
+
+
+
+// =============================================================================
 // Compound Symmetry
 CompoundSymmetry::CompoundSymmetry(){
   this->variance_ratio = 1.0;
   this->correlation = 1.0;
   this->estimate_parameters = TRUE;
 }
-CompoundSymmetry::CompoundSymmetry(double variance_ratio, double correlation, bool estimate_parameters){
+CompoundSymmetry::CompoundSymmetry(double variance_ratio, bool estimate_parameters){
   this->variance_ratio = variance_ratio;
-  this->correlation = correlation;
+  this->correlation = 1.;
   this->estimate_parameters = estimate_parameters;
 }
 

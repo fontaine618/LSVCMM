@@ -107,8 +107,8 @@ penalty_args = function(args){
 }
 
 # ==============================================================================
-DEFAULT_WORKING_COVARIANCE_ARGS = list(name="compound_symmetry", estimate=T, ratio=-1, correlation=0.5)
-IMPLEMENTED_WORKING_COVARIANCES = c("compound_symmetry", "autoregressive")
+DEFAULT_WORKING_COVARIANCE_ARGS = list(name="compound_symmetry", estimate=T, ratio=1., correlation=0.5)
+IMPLEMENTED_WORKING_COVARIANCES = c("compound_symmetry", "autoregressive", "independent")
 
 #' Prepare working covariance arguments
 #'

@@ -8,7 +8,7 @@
 * Updated computation of EBIC (was previously wrong)
 * Updated computation of profile likelihood in covariance update (previously was not using dispersion)
 * Made Kernel abstract and added Epanechnikov kernel
-* Made WorkingCovariance abstract and added AR(1)
+* Made WorkingCovariance abstract and Independent and added AR(1)
 * AR(1) estimation is not currently working.
 * Improve stepsize adaptation and dropped backtracking line search
 

@@ -35,10 +35,27 @@ public:
   static WorkingCovariance* Create(std::string name, double variance_ratio, double correlation, bool estimate_parameters);
 };
 
+class Independent : public WorkingCovariance{
+public:
+  Independent();
+  using WorkingCovariance::compute_precision;
+  arma::mat compute_precision(const arma::colvec &time);
+  uint update_parameters(
+      const std::vector<arma::colvec> &sr,
+      const std::vector<arma::colvec> &t,
+      const std::vector<arma::mat> &P,
+      const double dispersion,
+      Logger *logger,
+      uint round,
+      Control *control
+  );
+  void add_to_results(Rcpp::List& results);
+};
+
 class CompoundSymmetry : public WorkingCovariance{
 public:
   CompoundSymmetry();
-  CompoundSymmetry(double variance_ratio, double correlation, bool estimate_parameters);
+  CompoundSymmetry(double variance_ratio, bool estimate_parameters);
   using WorkingCovariance::compute_precision;
   arma::mat compute_precision(const arma::colvec &time);
   uint update_parameters(
