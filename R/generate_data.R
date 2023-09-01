@@ -125,13 +125,22 @@ generate_synthetic_data = function(
     data_wide=data_wide,
     data_wide_imputed=data_wide_imputed,
     true_values=true_values,
-    times=t0,
+    estimated_time=t0,
     colnames=list(
       subject="subject_id",
-      group="group",
-      long_index="time",
-      long_response="response",
-      wide_times=paste0("t", t0)
+      vc_covariates="group",
+      nvc_covariates=NULL,
+      offset=NULL,
+      index="time",
+      response="response"
+    ),
+    colnames_wide=list(
+      subject="subject_id",
+      vc_covariates="group",
+      nvc_covariates=NULL,
+      offset=NULL,
+      response="response",
+      time=paste0("t", t0)
     )
   )
 
