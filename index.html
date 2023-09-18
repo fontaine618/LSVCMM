@@ -62,7 +62,7 @@
   </div>
 </nav><div class="container template-home">
 <div class="row">
-  <main id="main" class="col-md-9"><p>Last updated: <em>Aug-12-2023</em></p>
+  <main id="main" class="col-md-9"><p>Last updated: <em>Sep-18-2023</em></p>
 <div class="section level1">
 <div class="page-header"><h1 id="lsvcmm">LSVCMM<a class="anchor" aria-label="anchor" href="#lsvcmm"></a>
 </h1></div>
@@ -109,12 +109,12 @@
 <code class="sourceCode R"><span></span>
 <span><span class="va">i</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/which.min.html" class="external-link">which.min</a></span><span class="op">(</span><span class="va">fit</span><span class="op">$</span><span class="va">results</span><span class="op">$</span><span class="va">ebich</span><span class="op">)</span></span>
 <span><span class="va">fit</span><span class="op">$</span><span class="va">vc_path</span><span class="op">[</span>,,<span class="va">i</span><span class="op">]</span></span>
-<span><span class="co">#&gt;             [,1]        [,2]       [,3]       [,4]       [,5]       [,6]</span></span>
-<span><span class="co">#&gt; [1,] -0.05392229 -0.07821785 -0.0979816 -0.1124308 -0.1214756 -0.1256716</span></span>
-<span><span class="co">#&gt; [2,]  0.00000000  0.00000000  0.0000000  0.0000000  0.0277699  0.1815235</span></span>
-<span><span class="co">#&gt;            [,7]       [,8]       [,9]      [,10]      [,11]</span></span>
-<span><span class="co">#&gt; [1,] -0.1260648 -0.1239628 -0.1206807 -0.1173126 -0.1145710</span></span>
-<span><span class="co">#&gt; [2,]  0.5833630  0.9045200  1.0915827  1.1004405  0.9117964</span></span>
+<span><span class="co">#&gt;             [,1]        [,2]        [,3]        [,4]        [,5]       [,6]</span></span>
+<span><span class="co">#&gt; [1,]  0.03275999 -0.01016253 -0.06624197 -0.09219969 -0.09158987 -0.1120982</span></span>
+<span><span class="co">#&gt; [2,] -0.20019829  0.00000000  0.00000000  0.00000000  0.03315548  0.1962638</span></span>
+<span><span class="co">#&gt;            [,7]       [,8]       [,9]      [,10]     [,11]</span></span>
+<span><span class="co">#&gt; [1,] -0.1921048 -0.3012465 -0.3340842 -0.1740154 0.2178366</span></span>
+<span><span class="co">#&gt; [2,]  0.8923241  1.0984185  1.2979464  1.0967269 0.4775085</span></span>
 <span><span class="va">data</span><span class="op">$</span><span class="va">true_values</span></span>
 <span><span class="co">#&gt;    time b0        b1</span></span>
 <span><span class="co">#&gt; 1   0.0  0 0.0000000</span></span>
@@ -130,19 +130,19 @@
 <span><span class="co">#&gt; 11  1.0  0 0.9996646</span></span>
 <span><span class="va">fit</span><span class="op">$</span><span class="va">results</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span></span>
 <span><span class="co">#&gt;           llk      rss family.dispersion family.name</span></span>
-<span><span class="co">#&gt; 234 -1272.443 1085.661          1.449481    gaussian</span></span>
+<span><span class="co">#&gt; 163 -1213.451 872.9491          1.165486    gaussian</span></span>
 <span><span class="co">#&gt;                    penalty.name penalty.alpha penalty.lambda penalty.adaptive</span></span>
-<span><span class="co">#&gt; 234 adaptive_sparse_group_lasso             1       1.844561                0</span></span>
+<span><span class="co">#&gt; 163 adaptive_sparse_group_lasso             1      0.5654141                0</span></span>
 <span><span class="co">#&gt;     penalty.penalize_intercept link_function.name working_covariance.estimate</span></span>
-<span><span class="co">#&gt; 234                      FALSE           identity                        TRUE</span></span>
+<span><span class="co">#&gt; 163                      FALSE           identity                        TRUE</span></span>
 <span><span class="co">#&gt;     working_covariance.ratio working_covariance.name kernel.name kernel.scale</span></span>
-<span><span class="co">#&gt; 234                0.4232983       compound_symmetry    gaussian            1</span></span>
+<span><span class="co">#&gt; 163                0.7461958       compound_symmetry    gaussian          0.5</span></span>
 <span><span class="co">#&gt;     control.max_iter control.max_rounds control.rel_tol control.verbose</span></span>
-<span><span class="co">#&gt; 234             1000                 50           1e-06               1</span></span>
-<span><span class="co">#&gt;     control.update_method control.backtracking_fraction df df_kernel  df_logn</span></span>
-<span><span class="co">#&gt; 234                  BPGD                           0.9 18  1.636364 105.7625</span></span>
-<span><span class="co">#&gt;     df_logn_kernel df_max      aic     aich      bic     bich     ebic    ebich</span></span>
-<span><span class="co">#&gt; 234       9.614768     22 2580.886 2548.159 2650.649 2554.501 2706.288 2559.559</span></span></code></pre></div>
+<span><span class="co">#&gt; 163             1000                 50           1e-06               1</span></span>
+<span><span class="co">#&gt;     control.update_method control.backtracking_fraction df df_kernel df_logn</span></span>
+<span><span class="co">#&gt; 163                   PGD                           0.9 19  1.949019  118.12</span></span>
+<span><span class="co">#&gt;     df_logn_kernel df_max      aic   aich      bic     bich     ebic    ebich</span></span>
+<span><span class="co">#&gt; 163       12.11674     22 2464.901 2430.8 2545.022 2439.018 2603.751 2445.043</span></span></code></pre></div>
 </div>
 </div>
 
