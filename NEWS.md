@@ -11,6 +11,7 @@
 * Made WorkingCovariance abstract and Independent and added AR(1)
 * AR(1) estimation is not currently working.
 * Improve stepsize adaptation and dropped backtracking line search
+* Added sine function in data generation
 
 # Version 0.0.1
 

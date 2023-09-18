@@ -12,6 +12,7 @@ generate_synthetic_data(
   random_effect_variance_ratio = 1,
   random_effect_ar1_correlation = 0.9,
   effect_size = 1,
+  grpdiff_function = "sigmoid",
   seed = 1
 )
 }
@@ -29,6 +30,8 @@ generate_synthetic_data(
 \item{random_effect_ar1_correlation}{Correlation between two random effects at two consecutive timepoints (default 0.9).}
 
 \item{effect_size}{Effect size of the group (default 1).}
+
+\item{grpdiff_function}{Group difference function (implemented: "sigmoid" (default), "sine")}
 
 \item{seed}{Seed for the random number generator (default 1).}
 }

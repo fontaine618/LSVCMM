@@ -7,6 +7,7 @@
 #' @param random_effect_variance_ratio Ratio of the variance of the random effect to the variance of the observation error (default 1).
 #' @param random_effect_ar1_correlation Correlation between two random effects at two consecutive timepoints (default 0.9).
 #' @param effect_size Effect size of the group (default 1).
+#' @param grpdiff_function Group difference function (implemented: "sigmoid" (default), "sine")
 #' @param seed Seed for the random number generator (default 1).
 #'
 #' @examples
@@ -64,6 +65,7 @@ generate_synthetic_data = function(
     random_effect_variance_ratio=1.,
     random_effect_ar1_correlation=0.9,
     effect_size=1,
+    grpdiff_function="sigmoid",
     seed=1
 ){
   # to get R CMD CHECK to stop whining
@@ -77,7 +79,9 @@ generate_synthetic_data = function(
   t0 = seq(0, n_timepoints-1) / (n_timepoints-1)
   timemat = matrix(t0, n_subjects, n_timepoints, byrow=T)
   f0 = function(t) t*0.
-  f1raw = function(t) 1/(1+exp((0.6-t)*20))
+  f1raw = function(t) 0.
+  if (grpdiff_function == "sigmoid") f1raw = function(t) 1/(1+exp((0.6-t)*20))
+  if (grpdiff_function == "sine") f1raw = function(t) pmax(0, sin((t-0.25)*pi*2))
   f1 = function(t) ifelse(abs(f1raw(t)) < 0.1, 0, f1raw(t)) # make small values exact 0s
   group = sample(0:1, n_subjects, T)
   groupmat = matrix(group, n_subjects, n_timepoints)

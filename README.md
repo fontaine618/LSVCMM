@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-Last updated: *Aug-12-2023*
+Last updated: *Sep-18-2023*
 
 # LSVCMM
 
@@ -58,12 +58,12 @@ ggplot() +
 
 i = which.min(fit$results$ebich)
 fit$vc_path[,,i]
-#>             [,1]        [,2]       [,3]       [,4]       [,5]       [,6]
-#> [1,] -0.05392229 -0.07821785 -0.0979816 -0.1124308 -0.1214756 -0.1256716
-#> [2,]  0.00000000  0.00000000  0.0000000  0.0000000  0.0277699  0.1815235
-#>            [,7]       [,8]       [,9]      [,10]      [,11]
-#> [1,] -0.1260648 -0.1239628 -0.1206807 -0.1173126 -0.1145710
-#> [2,]  0.5833630  0.9045200  1.0915827  1.1004405  0.9117964
+#>             [,1]        [,2]        [,3]        [,4]        [,5]       [,6]
+#> [1,]  0.03275999 -0.01016253 -0.06624197 -0.09219969 -0.09158987 -0.1120982
+#> [2,] -0.20019829  0.00000000  0.00000000  0.00000000  0.03315548  0.1962638
+#>            [,7]       [,8]       [,9]      [,10]     [,11]
+#> [1,] -0.1921048 -0.3012465 -0.3340842 -0.1740154 0.2178366
+#> [2,]  0.8923241  1.0984185  1.2979464  1.0967269 0.4775085
 data$true_values
 #>    time b0        b1
 #> 1   0.0  0 0.0000000
@@ -79,17 +79,17 @@ data$true_values
 #> 11  1.0  0 0.9996646
 fit$results[i, ]
 #>           llk      rss family.dispersion family.name
-#> 234 -1272.443 1085.661          1.449481    gaussian
+#> 163 -1213.451 872.9491          1.165486    gaussian
 #>                    penalty.name penalty.alpha penalty.lambda penalty.adaptive
-#> 234 adaptive_sparse_group_lasso             1       1.844561                0
+#> 163 adaptive_sparse_group_lasso             1      0.5654141                0
 #>     penalty.penalize_intercept link_function.name working_covariance.estimate
-#> 234                      FALSE           identity                        TRUE
+#> 163                      FALSE           identity                        TRUE
 #>     working_covariance.ratio working_covariance.name kernel.name kernel.scale
-#> 234                0.4232983       compound_symmetry    gaussian            1
+#> 163                0.7461958       compound_symmetry    gaussian          0.5
 #>     control.max_iter control.max_rounds control.rel_tol control.verbose
-#> 234             1000                 50           1e-06               1
-#>     control.update_method control.backtracking_fraction df df_kernel  df_logn
-#> 234                  BPGD                           0.9 18  1.636364 105.7625
-#>     df_logn_kernel df_max      aic     aich      bic     bich     ebic    ebich
-#> 234       9.614768     22 2580.886 2548.159 2650.649 2554.501 2706.288 2559.559
+#> 163             1000                 50           1e-06               1
+#>     control.update_method control.backtracking_fraction df df_kernel df_logn
+#> 163                   PGD                           0.9 19  1.949019  118.12
+#>     df_logn_kernel df_max      aic   aich      bic     bich     ebic    ebich
+#> 163       12.11674     22 2464.901 2430.8 2545.022 2439.018 2603.751 2445.043
 ```
