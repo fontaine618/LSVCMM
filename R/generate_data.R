@@ -96,11 +96,11 @@ generate_synthetic_data = function(
   # missing data
   if(missingness=="uniform") omat = matrix(stats::runif(n_timepoints*n_subjects) < prop_observed, n_subjects, n_timepoints)
   if(missingness=="contiguous"){
-    n_missing = rbinom(n_subjects, n_timepoints, 1-prop_observed)
+    n_missing = stats::rbinom(n_subjects, n_timepoints, 1-prop_observed)
     starting = sapply(n_missing, function(x) sample(1:(n_timepoints-x+1), 1))
     ending = starting + n_missing - 1
-    omat = matrix(1, n_subjects, n_timepoints)
-    for (i in 1:n_subjects) if(n_missing[i]>0) omat[i, starting[i]:ending[i]] = 0
+    omat = matrix(T, n_subjects, n_timepoints)
+    for (i in 1:n_subjects) if(n_missing[i]>0) omat[i, starting[i]:ending[i]] = F
   }
 
   data_full = data.frame(
