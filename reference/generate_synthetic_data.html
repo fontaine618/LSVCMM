@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">LSVCMM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -60,6 +60,7 @@
 <span>  random_effect_ar1_correlation <span class="op">=</span> <span class="fl">0.9</span>,</span>
 <span>  effect_size <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  grpdiff_function <span class="op">=</span> <span class="st">"sigmoid"</span>,</span>
+<span>  missingness <span class="op">=</span> <span class="st">"uniform"</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -96,6 +97,10 @@
 
 <dt>grpdiff_function</dt>
 <dd><p>Group difference function (implemented: "sigmoid" (default), "sine")</p></dd>
+
+
+<dt>missingness</dt>
+<dd><p>Missing observation mechanism (implemented: "uniform" (default), "sine")</p></dd>
 
 
 <dt>seed</dt>
