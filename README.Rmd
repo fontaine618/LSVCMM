@@ -34,7 +34,7 @@ devtools::install_github("fontaine618/LSVCMM")
 
 ## Reference
 
-For details on the LSVCMM method, refer to the [Draft manuscript](bit.ly/lsvcmm).
+For details on the LSVCMM method, refer to the [Draft manuscript](https://bit.ly/lsvcmm).
 
 ## Example
 

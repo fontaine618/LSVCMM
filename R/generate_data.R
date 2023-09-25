@@ -8,6 +8,7 @@
 #' @param random_effect_ar1_correlation Correlation between two random effects at two consecutive timepoints (default 0.9).
 #' @param effect_size Effect size of the group (default 1).
 #' @param grpdiff_function Group difference function (implemented: "sigmoid" (default), "sine")
+#' @param missingness Missing observation mechanism (implemented: "uniform" (default), "sine")
 #' @param seed Seed for the random number generator (default 1).
 #'
 #' @examples
@@ -66,6 +67,7 @@ generate_synthetic_data = function(
     random_effect_ar1_correlation=0.9,
     effect_size=1,
     grpdiff_function="sigmoid",
+    missingness="uniform",
     seed=1
 ){
   # to get R CMD CHECK to stop whining
@@ -90,7 +92,16 @@ generate_synthetic_data = function(
   errormat = matrix(stats::rnorm(n_timepoints*n_subjects), n_subjects, n_timepoints) * sqrt(observation_variance)
   ymat = term0mat + term1mat * effect_size + thetamat + errormat
   smat = matrix(seq(n_subjects), n_subjects, n_timepoints)
-  omat = matrix(stats::runif(n_timepoints*n_subjects) < prop_observed, n_subjects, n_timepoints)
+
+  # missing data
+  if(missingness=="uniform") omat = matrix(stats::runif(n_timepoints*n_subjects) < prop_observed, n_subjects, n_timepoints)
+  if(missingness=="contiguous"){
+    n_missing = rbinom(n_subjects, n_timepoints, 1-prop_observed)
+    starting = sapply(n_missing, function(x) sample(1:(n_timepoints-x+1), 1))
+    ending = starting + n_missing - 1
+    omat = matrix(1, n_subjects, n_timepoints)
+    for (i in 1:n_subjects) if(n_missing[i]>0) omat[i, starting[i]:ending[i]] = 0
+  }
 
   data_full = data.frame(
     response=as.vector(ymat),
