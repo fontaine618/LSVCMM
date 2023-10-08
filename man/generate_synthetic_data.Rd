@@ -32,7 +32,8 @@ generate_synthetic_data(
 
 \item{effect_size}{Effect size of the group (default 1).}
 
-\item{grpdiff_function}{Group difference function (implemented: "sigmoid" (default), "sine")}
+\item{grpdiff_function}{Group difference function (implemented: "sigmoid" (default), "sine".) Can also be a callable
+function, provided evaluation is vectorized.}
 
 \item{missingness}{Missing observation mechanism (implemented: "uniform" (default), "sine")}
 

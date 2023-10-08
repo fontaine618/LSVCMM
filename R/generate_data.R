@@ -7,7 +7,8 @@
 #' @param random_effect_variance_ratio Ratio of the variance of the random effect to the variance of the observation error (default 1).
 #' @param random_effect_ar1_correlation Correlation between two random effects at two consecutive timepoints (default 0.9).
 #' @param effect_size Effect size of the group (default 1).
-#' @param grpdiff_function Group difference function (implemented: "sigmoid" (default), "sine")
+#' @param grpdiff_function Group difference function (implemented: "sigmoid" (default), "sine".) Can also be a callable
+#' function, provided evaluation is vectorized.
 #' @param missingness Missing observation mechanism (implemented: "uniform" (default), "sine")
 #' @param seed Seed for the random number generator (default 1).
 #'
@@ -81,10 +82,16 @@ generate_synthetic_data = function(
   t0 = seq(0, n_timepoints-1) / (n_timepoints-1)
   timemat = matrix(t0, n_subjects, n_timepoints, byrow=T)
   f0 = function(t) t*0.
-  f1raw = function(t) 0.
-  if (grpdiff_function == "sigmoid") f1raw = function(t) 1/(1+exp((0.6-t)*20))
-  if (grpdiff_function == "sine") f1raw = function(t) pmax(0, sin((t-0.25)*pi*2))
-  f1 = function(t) ifelse(abs(f1raw(t)) < 0.1, 0, f1raw(t)) # make small values exact 0s
+  if(is.function(grpdiff_function)) {
+    print("User supplied function:")
+    f1raw = grpdiff_function
+    print(f1raw(t0))
+  }else{
+    f1raw = function(t) 0.
+    if (grpdiff_function == "sigmoid") f1raw = function(t) 1/(1+exp((0.6-t)*20))
+    if (grpdiff_function == "sine") f1raw = function(t) pmax(0, sin((t-0.25)*pi*2))
+  }
+  f1 = function(t) ifelse(abs(f1raw(t)) < 0.05, 0, f1raw(t)) # make small values exact 0s
   group = sample(0:1, n_subjects, T)
   groupmat = matrix(group, n_subjects, n_timepoints)
   term0mat = f0(timemat)

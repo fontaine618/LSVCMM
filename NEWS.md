@@ -1,6 +1,8 @@
 # To do list
 
 [ ] Improve AR1 estimation
+[ ] Move PGD within Penalty
+[ ] Make Penalty abstract
 
 
 # Version 0.0.2
@@ -12,6 +14,7 @@
 * AR(1) estimation is not currently working.
 * Improve stepsize adaptation and dropped backtracking line search
 * Added sine function in data generation
+* Data generation now allows user-supplied group difference function
 
 # Version 0.0.1
 

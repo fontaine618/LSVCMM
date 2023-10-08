@@ -88,10 +88,20 @@ public:
         // compute adaptive weights
         if(this->model->penalty->power > 0.){
           Rcpp::Rcout << "         Preparing adaptive penalty weights\n";
+          // need to set to independent kernel with no penalty
+          double old_vr = this->model->workingCovariance->variance_ratio;
+          this->model->workingCovariance->variance_ratio = 0.;
+          bool estimate_parameters = this->model->workingCovariance->estimate_parameters;
+          this->model->workingCovariance->estimate_parameters = false;
+
           this->model->penalty->lambda = 0.;
           this->model->fit(data);
           this->model->penalty->update_weights(this->model->B);
           this->model->B.zeros();
+
+          // reset covariance
+          this->model->workingCovariance->variance_ratio = old_vr;
+          this->model->workingCovariance->estimate_parameters = estimate_parameters;
         }
       }
       // same kernel scale
