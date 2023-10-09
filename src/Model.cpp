@@ -35,6 +35,8 @@ Model::Model(
   this->kernel = kernel;
 
   this->B = arma::mat(px, estimated_time.n_elem, arma::fill::zeros);
+  this->penalty->update_B0(this->B);
+  this->penalty->update_weights();
   this->a = arma::colvec(pu, arma::fill::zeros);
   this->gB = arma::mat(px, estimated_time.n_elem, arma::fill::zeros);
   this->ga = arma::colvec(pu, arma::fill::zeros);
@@ -262,15 +264,14 @@ void Model::reset_stepsize(){
 
 double Model::lambda_max(Data &data){
   this->penalty->lambda = 1e10;
+  this->penalty->large_weights(this->B);
   this->fit(data);
   this->logger->reset();
+  this->penalty->unit_weights(this->B);
   return this->penalty->lambda_max(this->B, this->gB, 1./this->LB);
 }
 
 void Model::fit(Data &data){
-  // // hack for the moment
-  // if(this->kernel->scale > 0.5) this->control->update_method = "BPGD";
-  // else this->control->update_method = "PGD";
 
   this->logger->reset();
   this->momentum = 1.;

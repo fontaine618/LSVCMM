@@ -86,8 +86,10 @@ lsvcmm = function(
     kernel_scale=kernel$scale,
     n_kernel_scale=kernel$n_scale,
 
+    penalty_name=penalty$name,
     penalize_intercept=penalty$penalize_intercept,
     alpha=penalty$alpha,
+    scad_a=penalty$a,
     adaptive=penalty$adaptive,
     lambda=penalty$lambda,
     lambda_factor=penalty$lambda_factor,

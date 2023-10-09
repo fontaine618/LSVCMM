@@ -63,10 +63,10 @@ kernel_args = function(args){
 }
 
 # ==============================================================================
-DEFAULT_PENALTY_ARGS = list(name="adaptive_sparse_group_lasso", alpha=1.,
+DEFAULT_PENALTY_ARGS = list(name="adaptive_sparse_group_lasso", alpha=1., a=3.7,
                             lambda=NULL, n_lambda=100L,
                             lambda_factor=0.001, adaptive=0., penalize_intercept=F)
-IMPLEMENTED_PENALTIES = c("adaptive_sparse_group_lasso")
+IMPLEMENTED_PENALTIES = c("adaptive_sparse_group_lasso", "sparse_group_scad", "sparse_group_mcp")
 
 
 #' Prepare penalty arguments
@@ -78,6 +78,7 @@ IMPLEMENTED_PENALTIES = c("adaptive_sparse_group_lasso")
 #' \describe{
 #' \item{\code{name}}{The penalty function. Currently, only \code{"adaptive_sparse_group_lasso"} is supported.}
 #' \item{\code{alpha}}{The mixing parameter. Must be between 0 and 1. 1 is pure Lasso (default); 0 is pure group Lasso.}
+#' \item{\code{a}}{The SCAD parameter, requires >=2. Default: 3.7.}
 #' \item{\code{lambda}}{The penalty parameter. If \code{NULL} (default), a logarithmic grid search is used.}
 #' \item{\code{n_lambda}}{The number of penalty parameters to use if \code{lambda} is \code{NULL} (default.)}
 #' \item{\code{lambda_factor}}{The factor by which the penalty parameter is reduced overall (default: \code{1e-4}.)}
@@ -99,6 +100,7 @@ penalty_args = function(args){
   if(is.null(out[["lambda"]])) out[["lambda"]] = numeric(0L)
   stopifnot(out[["name"]] %in% IMPLEMENTED_PENALTIES)
   stopifnot(out[["alpha"]] >= 0 & out[["alpha"]] <= 1)
+  stopifnot(out[["a"]] >= 2)
   stopifnot(all(out[["lambda"]] >= 0))
   stopifnot(out[["n_lambda"]] > 0)
   stopifnot(out[["lambda_factor"]] > 0 & out[["lambda_factor"]] < 1)

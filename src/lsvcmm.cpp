@@ -27,8 +27,10 @@ Rcpp::List LSVCMM(
     arma::rowvec &estimated_time,
     arma::vec &kernel_scale,
     unsigned int n_kernel_scale,
-    bool penalize_intercept, // PENALTY
+    std::string penalty_name, // PENALTY
+    bool penalize_intercept,
     double alpha,
+    double scad_a,
     double adaptive,
     arma::vec &lambda,
     double lambda_factor,
@@ -70,8 +72,8 @@ Rcpp::List LSVCMM(
   if(control->verbose) Rcpp::Rcout << "[LSVCMM] Initializing link function. link_function=" << link << "\n";
   Identity* link_function = new Identity();
 
-  if(control->verbose) Rcpp::Rcout << "[LSVCMM] Initializing penalty \n";
-  Penalty *penalty = new Penalty(0., alpha, adaptive, penalize_intercept);
+  if(control->verbose) Rcpp::Rcout << "[LSVCMM] Initializing penalty. penalty_name=" << penalty_name << "\n";
+  Penalty *penalty = Penalty::Create(penalty_name, 0., alpha, adaptive, scad_a, penalize_intercept);
 
   if(control->verbose) Rcpp::Rcout << "[LSVCMM] Initializing working covariance. working_covariance=" << working_covariance << "\n";
   if(variance_ratio < 0.) variance_ratio = log(data.n);

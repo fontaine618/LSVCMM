@@ -76,18 +76,18 @@ public:
         this->model->B.zeros();
         this->model->kernel->scale = this->kernel_scale(m);
         data.W = this->model->kernel->eval(this->model->estimated_time, data.t);
+
         // prepare Lipschitz constants
         Rcpp::Rcout << "         Computing Lipschitz constants\n";
         this->model->prepare_stepsize(data);
-        this->model->penalty->unit_weights(this->model->B);
-        // find largest lambda
-        if(this->mode == "grid_search"){
-          Rcpp::Rcout << "         Finding lambda max\n";
-          this->lambda(m) = this->model->lambda_max(data);
-        }
-        // compute adaptive weights
-        if(this->model->penalty->power > 0.){
-          Rcpp::Rcout << "         Preparing adaptive penalty weights\n";
+
+        // if(this->model->penalty->compute_penalty_weights){
+        // we are not using this anymore, since initialization at the independent MLE is better in all cases.
+        // anyway, there are very few cases where we don't want to do this
+        // one example where this is important is adaptiveSGL with lambda=0 fixed; most other cases
+        // need this anyways
+          // compute adaptive weights
+          Rcpp::Rcout << "         Initialization & Preparing penalty weights\n";
           // need to set to independent kernel with no penalty
           double old_vr = this->model->workingCovariance->variance_ratio;
           this->model->workingCovariance->variance_ratio = 0.;
@@ -95,22 +95,28 @@ public:
           this->model->workingCovariance->estimate_parameters = false;
 
           this->model->penalty->lambda = 0.;
+          this->model->penalty->update_weights(); // to propagate
           this->model->fit(data);
-          this->model->penalty->update_weights(this->model->B);
-          this->model->B.zeros();
-
+          this->model->logger->reset();
+          this->model->penalty->update_B0(this->model->B);
           // reset covariance
           this->model->workingCovariance->variance_ratio = old_vr;
           this->model->workingCovariance->estimate_parameters = estimate_parameters;
+        // }
+
+        // find largest lambda
+        if(this->mode == "grid_search"){
+          Rcpp::Rcout << "         Finding lambda max\n";
+          this->lambda(m) = this->model->lambda_max(data);
         }
       }
       // same kernel scale
       // this->lambda.t().print("lambda for path");
       if(this->mode == "grid_search" and !this->new_kernel(m)) this->lambda(m) = this->lambda(m-1) * this->lambda_factor;
-      this->model->penalty->lambda = this->lambda(m);
       // run
       Rcpp::Rcout << "         Fitting lambda=" << this->lambda(m) << "\n";
       this->model->penalty->lambda = this->lambda(m);
+      this->model->penalty->update_weights();
       this->model->fit(data);
 
       models[m] = this->model->save();

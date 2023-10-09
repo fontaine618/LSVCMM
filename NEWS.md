@@ -1,8 +1,8 @@
 # To do list
 
 [ ] Improve AR1 estimation
-[ ] Move PGD within Penalty
-[ ] Make Penalty abstract
+[ ] Understand dip at boundary
+[ ] Understand why SCAD and SGL with lamba=0 does not give the same thing??
 
 
 # Version 0.0.2
@@ -15,6 +15,8 @@
 * Improve stepsize adaptation and dropped backtracking line search
 * Added sine function in data generation
 * Data generation now allows user-supplied group difference function
+* Made penalty abstract and added SCAD and MCP
+* Uniformize initialization to independent MLE
 
 # Version 0.0.1
 

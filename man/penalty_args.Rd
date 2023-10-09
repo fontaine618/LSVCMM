@@ -20,6 +20,7 @@ The following arguments are supported:
 \describe{
 \item{\code{name}}{The penalty function. Currently, only \code{"adaptive_sparse_group_lasso"} is supported.}
 \item{\code{alpha}}{The mixing parameter. Must be between 0 and 1. 1 is pure Lasso (default); 0 is pure group Lasso.}
+\item{\code{a}}{The SCAD parameter, requires >=2. Default: 3.7.}
 \item{\code{lambda}}{The penalty parameter. If \code{NULL} (default), a logarithmic grid search is used.}
 \item{\code{n_lambda}}{The number of penalty parameters to use if \code{lambda} is \code{NULL} (default.)}
 \item{\code{lambda_factor}}{The factor by which the penalty parameter is reduced overall (default: \code{1e-4}.)}
