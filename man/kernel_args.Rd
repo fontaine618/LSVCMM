@@ -21,6 +21,7 @@ The following arguments are supported:
 \item{\code{name}}{The kernel function. Currently, only \code{"gaussian"} is supported.}
 \item{\code{scale}}{The scale parameter. If \code{NULL}, a logarithmic grid search is used.}
 \item{\code{n_scale}}{The number of scale parameters to use if \code{scale} is \code{NULL} (default.)}
+\item{\code{rescale_boundary}}{Whether to resscale the kernel at the boundary (default: TRUE.)}
 \item{\code{...}}{Additional arguments. Currently ignored.}
 }
 

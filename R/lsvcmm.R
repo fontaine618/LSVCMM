@@ -85,6 +85,7 @@ lsvcmm = function(
     estimated_time=time$scaled,
     kernel_scale=kernel$scale,
     n_kernel_scale=kernel$n_scale,
+    rescale_boundary=kernel$rescale_boundary,
 
     penalty_name=penalty$name,
     penalize_intercept=penalty$penalize_intercept,

@@ -74,8 +74,8 @@ public:
         Rcpp::Rcout << "[LSVCMM] NEW KERNEL SCALE (" << this->kernel_scale(m) << ", "<< m+1 << "/" << this->n_models << ")\n";
         this->model->a.zeros();
         this->model->B.zeros();
-        this->model->kernel->scale = this->kernel_scale(m);
-        data.W = this->model->kernel->eval(this->model->estimated_time, data.t);
+        this->model->kernel->update_scale(this->kernel_scale(m));
+        data.W = this->model->kernel->eval(data.t);
 
         // prepare Lipschitz constants
         Rcpp::Rcout << "         Computing Lipschitz constants\n";

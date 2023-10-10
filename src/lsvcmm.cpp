@@ -26,6 +26,7 @@ Rcpp::List LSVCMM(
     std::string kernel_name, // KERNEL
     arma::rowvec &estimated_time,
     arma::vec &kernel_scale,
+    bool rescale_boundary,
     unsigned int n_kernel_scale,
     std::string penalty_name, // PENALTY
     bool penalize_intercept,
@@ -64,7 +65,7 @@ Rcpp::List LSVCMM(
   data.I = interpolator.interpolator_matrix(data.t);
 
   if(control->verbose) Rcpp::Rcout << "[LSVCMM] Initializing kernel. kernel_name=" << kernel_name << "\n";
-  Kernel* kernel = Kernel::Create(kernel_name);
+  Kernel* kernel = Kernel::Create(kernel_name, rescale_boundary, estimated_time);
 
   if(control->verbose) Rcpp::Rcout << "[LSVCMM] Initializing family. family_name=" << family_name << "\n";
   Gaussian* family = new Gaussian();

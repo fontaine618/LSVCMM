@@ -1,8 +1,7 @@
 # To do list
 
 [ ] Improve AR1 estimation
-[ ] Understand dip at boundary
-[ ] Understand why SCAD and SGL with lamba=0 does not give the same thing??
+[ ] Boundary rescaling for all kernels (only gaussian currenlty)
 
 
 # Version 0.0.2
@@ -17,6 +16,7 @@
 * Data generation now allows user-supplied group difference function
 * Made penalty abstract and added SCAD and MCP
 * Uniformize initialization to independent MLE
+* Added rescaling of the kernel at the boundary
 
 # Version 0.0.1
 

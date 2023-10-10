@@ -29,8 +29,8 @@ family_args = function(args){
 }
 
 # ==============================================================================
-DEFAULT_KERNEL_ARGS = list(name="gaussian", scale=NULL, n_scale=11L)
-IMPLEMENTED_KERNELS = c("gaussian", "epa")
+DEFAULT_KERNEL_ARGS = list(name="gaussian", scale=NULL, n_scale=11L, rescale_boundary=T)
+IMPLEMENTED_KERNELS = c("gaussian", "epa", "linear", "triweight")
 
 
 #' Prepare kernel arguments
@@ -43,6 +43,7 @@ IMPLEMENTED_KERNELS = c("gaussian", "epa")
 #' \item{\code{name}}{The kernel function. Currently, only \code{"gaussian"} is supported.}
 #' \item{\code{scale}}{The scale parameter. If \code{NULL}, a logarithmic grid search is used.}
 #' \item{\code{n_scale}}{The number of scale parameters to use if \code{scale} is \code{NULL} (default.)}
+#' \item{\code{rescale_boundary}}{Whether to resscale the kernel at the boundary (default: TRUE.)}
 #' \item{\code{...}}{Additional arguments. Currently ignored.}
 #' }
 #'
