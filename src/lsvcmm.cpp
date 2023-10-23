@@ -9,6 +9,7 @@
 #include "Interpolator.h"
 #include "Path.cpp"
 #include "Control.cpp"
+#include "Logger.cpp"
 #include "uint.h"
 
 // [[Rcpp::depends(RcppArmadillo)]]
@@ -45,9 +46,18 @@ Rcpp::List LSVCMM(
     double rel_tol,
     unsigned int verbose,
     std::string update_method,
-    double backtracking_fraction
+    double backtracking_fraction,
+    bool two_step_estimation
 ){
-  Control* control = new Control(max_rounds, max_iter, rel_tol, verbose, update_method, backtracking_fraction);
+  Control* control = new Control(
+    max_rounds,
+    max_iter,
+    rel_tol,
+    verbose,
+    update_method,
+    backtracking_fraction,
+    two_step_estimation
+  );
 
   if(control->verbose) Rcpp::Rcout << "[LSVCMM] Initializing data \n";
   Data data = Data(

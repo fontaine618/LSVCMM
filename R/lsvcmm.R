@@ -106,7 +106,8 @@ lsvcmm = function(
     rel_tol=control$rel_tol,
     verbose=control$verbose,
     update_method=control$update_method,
-    backtracking_fraction=control$backtracking_fraction
+    backtracking_fraction=control$backtracking_fraction,
+    two_step_estimation=control$two_step
   )
   fit = lapply(fit, function(model){
     class(model) = "LSVCMM"
@@ -136,7 +137,16 @@ lsvcmm = function(
     unscaled_time=time$unscaled, # the corresponding values in the original scale
     range_time=time$range # sufficient to map to scaled time
   )
-  if(return_models) res$models = fit
+  if(return_models){
+    res$models = fit
+    pf = res$models[[length(res$models)]]$log$profiler
+    res$profile = pf %>% dplyr::bind_rows(.id="Class.function") %>% dplyr::mutate(
+      time_per_call = time / calls,
+    )
+
+  }
+
+
 
   class(res) = c("LSVCMM.Path")
   return(res)

@@ -2,6 +2,9 @@
 
 [ ] Improve AR1 estimation
 [ ] Boundary rescaling for all kernels (only gaussian currenlty)
+[ ] Disable profiling
+[ ] Instead of rescaling, change gradient so it is scaled by the total weight
+  - make sure hessian also is scaled by the same thing
 
 
 # Version 0.0.2
@@ -17,6 +20,9 @@
 * Made penalty abstract and added SCAD and MCP
 * Uniformize initialization to independent MLE
 * Added rescaling of the kernel at the boundary
+* Initialize covariance parameters under unpenalized independent model
+* Enable two-step estimation where covariance parameters are fixed after initialization
+* Added profiling to identify expensive functions
 
 # Version 0.0.1
 

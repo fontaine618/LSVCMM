@@ -6,6 +6,41 @@
 #ifndef Logger_hpp
 #define Logger_hpp
 
+class FunctionProfile {
+public:
+  uint calls;
+  double time;
+  FunctionProfile() : calls(0), time(0) {}
+  void add_call(const std::chrono::duration<double> diff){
+    this->calls++;
+    this->time += std::chrono::duration <double, std::milli> (diff).count();
+  }
+  Rcpp::List to_rcpp(){
+    return Rcpp::List::create(
+      Rcpp::Named("calls") = Rcpp::wrap(calls),
+      Rcpp::Named("time") = Rcpp::wrap(time)
+    );
+  }
+};
+
+class Profiler {
+  std::map <std::string, FunctionProfile> profiler;
+public:
+  void add_call(std::string name, const std::chrono::duration<double> diff){
+    if (profiler.find(name) == profiler.end()){
+      profiler[name] = FunctionProfile();
+    }
+    profiler[name].add_call(diff);
+  }
+  Rcpp::List to_rcpp(){
+    Rcpp::List result;
+    for (auto it = profiler.begin(); it != profiler.end(); ++it){
+      result[it->first] = it->second.to_rcpp();
+    }
+    return result;
+  }
+};
+
 class Logger {
 
   // per-round data
@@ -25,6 +60,8 @@ class Logger {
   std::vector<double> variance_objective;
 
 public:
+
+  Profiler profiler;
 
   void add_round_results(
       uint round,
@@ -82,7 +119,8 @@ public:
       Rcpp::Named("mean_objective") = Rcpp::wrap(mean_objective),
       Rcpp::Named("variance_round") = Rcpp::wrap(variance_round),
       Rcpp::Named("variance_iteration_within_round") = Rcpp::wrap(variance_iteration_within_round),
-      Rcpp::Named("variance_objective") = Rcpp::wrap(variance_objective)
+      Rcpp::Named("variance_objective") = Rcpp::wrap(variance_objective),
+      Rcpp::Named("profiler") = profiler.to_rcpp()
     );
   }
 };

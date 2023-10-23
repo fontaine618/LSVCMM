@@ -110,7 +110,10 @@ penalty_args = function(args){
 }
 
 # ==============================================================================
-DEFAULT_WORKING_COVARIANCE_ARGS = list(name="compound_symmetry", estimate=T, ratio=1., correlation=0.5)
+DEFAULT_WORKING_COVARIANCE_ARGS = list(
+  name="compound_symmetry", estimate=T,
+  ratio=1., correlation=0.5
+  )
 IMPLEMENTED_WORKING_COVARIANCES = c("compound_symmetry", "autoregressive", "independent")
 
 #' Prepare working covariance arguments
@@ -138,7 +141,7 @@ working_covariance_args = function(args){
 
 # ==============================================================================
 DEFAULT_CONTROL_ARGS = list(max_rounds=50, max_iter=1000, rel_tol=1e-6, verbose=1, update_method="PGD",
-                            backtracking_fraction=0.9)
+                            backtracking_fraction=0.9, two_step=T)
 
 #' Prepare control arguments
 #'
@@ -153,6 +156,7 @@ DEFAULT_CONTROL_ARGS = list(max_rounds=50, max_iter=1000, rel_tol=1e-6, verbose=
 #' \item{\code{verbose}}{The verbosity level. Must be 0, 1(default), 2, or 3.}
 #' \item{\code{update_method}}{The update method. Currently, only \code{"PGD"} is allowed.}
 #' \item{\code{backtracking_fraction}}{The backtracking fraction. Must be between 0 and 1 (default: \code{0.9}.)}
+#' \item{\code{two_step}}{Whether to estimate the parameters only once. Must be \code{TRUE} (default) or \code{FALSE}.}
 #' \item{\code{...}}{Additional arguments. Currently ignored.}
 #' }
 #'
@@ -167,6 +171,7 @@ control_args = function(args){
   stopifnot(out[["verbose"]] %in% c(0, 1, 2, 3))
   stopifnot(out[["update_method"]] %in% c("PGD"))
   stopifnot(out[["backtracking_fraction"]] > 0 & out[["backtracking_fraction"]] < 1)
+  stopifnot(is.logical(out[["two_step"]]))
   return(out)
 }
 

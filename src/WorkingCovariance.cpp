@@ -77,7 +77,7 @@ void Independent::add_to_results(Rcpp::List& results){
 CompoundSymmetry::CompoundSymmetry(){
   this->variance_ratio = 1.0;
   this->correlation = 1.0;
-  this->estimate_parameters = TRUE;
+  this->estimate_parameters = true;
 }
 CompoundSymmetry::CompoundSymmetry(double variance_ratio, bool estimate_parameters){
   this->variance_ratio = variance_ratio;
@@ -124,12 +124,15 @@ uint CompoundSymmetry::update_parameters(
     uint round,
     Control *control
 ){
+  const auto start = std::chrono::high_resolution_clock::now();
   if(!this->estimate_parameters) return 0;
   double pllk = this->profile_likelihood(sr, P, dispersion);
   double pllk_prev = pllk;
   std::vector<arma::mat> Ptmp = P;
   uint iter;
   for(iter=0; iter<control->max_iter; iter++){
+
+    const auto start2 = std::chrono::high_resolution_clock::now();
     // d[0] is d/dr, d[1] is d^2/dr^2
     std::vector<double> d = this->derivatives(sr, t, Ptmp, dispersion);
     // log NR step for variance ratio
@@ -147,13 +150,16 @@ uint CompoundSymmetry::update_parameters(
     Ptmp = this->compute_precision(t);
     pllk = this->profile_likelihood(sr, Ptmp, dispersion);
     logger->add_variance_iteration_results(round, iter, pllk);
+    logger->profiler.add_call("WorkingCovariance.update_parameters.inner_loop", std::chrono::high_resolution_clock::now() - start2);
     if(control->verbose > 2) Rcpp::Rcout << "          " << round <<".V." << iter <<
       " obj=" << pllk << "\n";
     if(fabs(pllk - pllk_prev) / fabs(pllk) < control->rel_tol) {
       break;
     }
     pllk_prev = pllk;
+
   }
+  logger->profiler.add_call("WorkingCovariance.update_parameters", std::chrono::high_resolution_clock::now() - start);
   return iter;
 }
 
@@ -170,7 +176,7 @@ void CompoundSymmetry::add_to_results(Rcpp::List& results){
 Autoregressive::Autoregressive(){
   this->variance_ratio = 1.0;
   this->correlation = 0.5;
-  this->estimate_parameters = TRUE;
+  this->estimate_parameters = true;
 }
 Autoregressive::Autoregressive(double variance_ratio, double correlation, bool estimate_parameters){
   this->variance_ratio = variance_ratio;

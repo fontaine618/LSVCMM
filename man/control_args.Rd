@@ -24,6 +24,7 @@ The following arguments are supported:
 \item{\code{verbose}}{The verbosity level. Must be 0, 1(default), 2, or 3.}
 \item{\code{update_method}}{The update method. Currently, only \code{"PGD"} is allowed.}
 \item{\code{backtracking_fraction}}{The backtracking fraction. Must be between 0 and 1 (default: \code{0.9}.)}
+\item{\code{two_step}}{Whether to estimate the parameters only once. Must be \code{TRUE} (default) or \code{FALSE}.}
 \item{\code{...}}{Additional arguments. Currently ignored.}
 }
 }

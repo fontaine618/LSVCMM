@@ -86,29 +86,44 @@ public:
         // anyway, there are very few cases where we don't want to do this
         // one example where this is important is adaptiveSGL with lambda=0 fixed; most other cases
         // need this anyways
-          // compute adaptive weights
-          Rcpp::Rcout << "         Initialization & Preparing penalty weights\n";
-          // need to set to independent kernel with no penalty
-          double old_vr = this->model->workingCovariance->variance_ratio;
-          this->model->workingCovariance->variance_ratio = 0.;
-          bool estimate_parameters = this->model->workingCovariance->estimate_parameters;
-          this->model->workingCovariance->estimate_parameters = false;
+        // compute adaptive weights
+        Rcpp::Rcout << "         Initialization to unpenalized independent model\n";
+        // need to set to independent kernel with no penalty
+        double old_vr = this->model->workingCovariance->variance_ratio;
+        this->model->workingCovariance->variance_ratio = 0.;
+        bool estimate_parameters = this->model->workingCovariance->estimate_parameters;
+        this->model->workingCovariance->estimate_parameters = false;
+        this->model->penalty->lambda = 0.;
+        this->model->penalty->update_weights(); // to propagate
+        this->model->fit(data);
 
-          this->model->penalty->lambda = 0.;
-          this->model->penalty->update_weights(); // to propagate
-          this->model->fit(data);
-          this->model->logger->reset();
-          this->model->penalty->update_B0(this->model->B);
-          // reset covariance
-          this->model->workingCovariance->variance_ratio = old_vr;
-          this->model->workingCovariance->estimate_parameters = estimate_parameters;
-        // }
+        Rcpp::Rcout << "         Preparing penalty weights\n";
+        this->model->penalty->update_B0(this->model->B);
+        // reset covariance
+        this->model->workingCovariance->variance_ratio = old_vr;
+        this->model->workingCovariance->estimate_parameters = estimate_parameters;
+
+        Rcpp::Rcout << "         Initialize covariance parameters\n";
+        this->model->update_precision(data);
+        this->model->workingCovariance->update_parameters(
+            data.sr, data.t, data.P,
+            this->model->family->dispersion, this->model->logger,
+            0, this->model->control
+        );
+
+        if(this->model->control->two_step_estimation){
+          Rcpp::Rcout << "         Two-step estimation: fix covariance parameters\n";
+          this->model->workingCovariance->estimate_parameters = false;
+        }
 
         // find largest lambda
         if(this->mode == "grid_search"){
           Rcpp::Rcout << "         Finding lambda max\n";
           this->lambda(m) = this->model->lambda_max(data);
         }
+
+        // remove logging in preparation phase
+        this->model->logger->reset();
       }
       // same kernel scale
       // this->lambda.t().print("lambda for path");

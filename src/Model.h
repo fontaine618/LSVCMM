@@ -25,13 +25,13 @@ public:
 
   arma::mat B;
   arma::mat gB;
-  arma::mat Bprev;
+  arma::mat BB;
   double LB = 0.1;
   double ssB = 0.1;
 
   arma::colvec a;
   arma::colvec ga;
-  arma::colvec aprev;
+  arma::colvec aa;
   double La = 0.01;
   double ssa = 0.01;
 

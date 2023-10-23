@@ -35,11 +35,16 @@ Model::Model(
   this->kernel = kernel;
 
   this->B = arma::mat(px, estimated_time.n_elem, arma::fill::zeros);
+  this->a = arma::colvec(pu, arma::fill::zeros);
   this->penalty->update_B0(this->B);
   this->penalty->update_weights();
-  this->a = arma::colvec(pu, arma::fill::zeros);
   this->gB = arma::mat(px, estimated_time.n_elem, arma::fill::zeros);
   this->ga = arma::colvec(pu, arma::fill::zeros);
+
+  // Momentum
+  this->BB = arma::mat(px, estimated_time.n_elem, arma::fill::zeros);
+  this->aa = arma::colvec(pu, arma::fill::zeros);
+  this->momentum = 1.;
 
   this->logger = new Logger();
 }
@@ -47,16 +52,19 @@ Model::Model(
 Model::Model(){}
 
 std::vector<arma::colvec> Model::linear_predictor(Data &data){
+  const auto start = std::chrono::high_resolution_clock::now();
   std::vector<arma::colvec> lp(data.N);
   for(uint i=0; i<data.N; i++){
     lp[i] = data.o[i];
     lp[i] += arma::sum((data.X[i] * this->B) % data.I[i], 1);
     if(this->pu) lp[i] += data.U[i] * this->a;
   }
+  this->logger->profiler.add_call("Model.linear_predictor", std::chrono::high_resolution_clock::now() - start);
   return lp;
 }
 
 void Model::update_mean(Data &data){
+  const auto start = std::chrono::high_resolution_clock::now();
   data.lp = this->linear_predictor(data);
   data.m = this->linkFunction->eval(data.lp);
   for(uint i=0; i<data.N; i++){
@@ -65,25 +73,35 @@ void Model::update_mean(Data &data){
     data.sr[i] = data.r[i] / data.s[i];
     data.sPsr[i] = (data.P[i] * data.sr[i]) / data.s[i];
   }
+  this->logger->profiler.add_call("Model.update_mean", std::chrono::high_resolution_clock::now() - start);
 }
 
 void Model::update_precision(Data &data){
+  const auto start = std::chrono::high_resolution_clock::now();
   data.P = this->workingCovariance->compute_precision(data.t);
+  for(uint i=0; i<data.N; i++){
+    data.sPsr[i] = (data.P[i] * data.sr[i]) / data.s[i];
+  }
+  this->logger->profiler.add_call("Model.update_precision", std::chrono::high_resolution_clock::now() - start);
 }
 
 double Model::quadratic_term(const Data &data){
+  const auto start = std::chrono::high_resolution_clock::now();
   double q = 0;
   for(uint i=0; i<data.N; i++){
     q += arma::dot(data.r[i], data.sPsr[i]);
   }
+  this->logger->profiler.add_call("Model.quadratic_term", std::chrono::high_resolution_clock::now() - start);
   return q;
 }
 
 double Model::logdet_precision(const Data &data){
+  const auto start = std::chrono::high_resolution_clock::now();
   double ld = 0;
   for(uint i=0; i<data.N; i++){
     ld += arma::log_det_sympd(data.P[i]);
   }
+  this->logger->profiler.add_call("Model.logdet_precision", std::chrono::high_resolution_clock::now() - start);
   return ld;
 }
 
@@ -104,6 +122,7 @@ double Model::quasi_log_likelihood(double quad_term, double logdet_term){
 }
 
 void Model::update_gradients(const Data &data){
+  const auto start = std::chrono::high_resolution_clock::now();
   this->gB.zeros();
   this->ga.zeros();
   uint nt = this->B.n_cols;
@@ -118,14 +137,37 @@ void Model::update_gradients(const Data &data){
   }
   this->gB *= -1;
   this->ga *= -1;
+  this->logger->profiler.add_call("Model.update_gradients", std::chrono::high_resolution_clock::now() - start);
 }
 
 void Model::proximal_gradient_step(Data &data){
-  this->update_mean(data);
+  const auto start = std::chrono::high_resolution_clock::now();
+  // this->update_mean(data);
   this->update_gradients(data);
   this->a -= this->ga * this->ssa;
   this->B -= this->gB * this->ssB;
   this->B = this->penalty->proximal(this->B, this->ssB);
+  this->logger->profiler.add_call("Model.proximal_gradient_step", std::chrono::high_resolution_clock::now() - start);
+}
+
+void Model::accelerated_proximal_gradient_step(){
+  double pt = this->momentum;
+  double newt = 0.5 * (1. + sqrt(1 + 4.*pt*pt));
+  // Compute original trajectory (aa, BB)
+  // gradient step
+  arma::colvec tmpa = this->a - this->ga / this->La;
+  arma::mat tmpB = this->B - this->gB / this->LB;
+  // prox step
+  tmpB = this->penalty->proximal(tmpB, 1./this->LB);
+
+  // Momentum step (a, B)
+  this->a = tmpa + (pt - 1.) * (tmpa - this->aa) / newt;
+  this->B = tmpB + (pt - 1.) * (tmpB - this->BB) / newt;
+
+  // Store
+  this->aa = tmpa;
+  this->BB = tmpB;
+  this->momentum = newt;
 }
 
 void Model::backtracking_proximal_gradient_step(Data &data){
@@ -170,20 +212,6 @@ void Model::backtracking_proximal_gradient_step(Data &data){
   // NB: selected proposal already stored in a and B
 }
 
-void Model::accelerated_proximal_gradient_step(){
-  Rcpp::stop("APGD not working yet");
-  double pt = this->momentum;
-  double newt = 0.5 * (1. + sqrt(1 + 4.*pt*pt));
-  arma::colvec tmpa = this->a - this->ga / this->La;
-  arma::mat tmpB = this->B - this->gB / this->LB;
-  tmpB = this->penalty->proximal(tmpB, 1./this->LB);
-  this->a = tmpa + (pt - 1.) * (tmpa - this->aprev) / newt;
-  this->B = tmpB + (pt - 1.) * (tmpB - this->Bprev) / newt;
-  this->aprev = tmpa;
-  this->Bprev = tmpB;
-  this->momentum = newt;
-}
-
 void Model::backtracking_accelerated_proximal_gradient_step(const Data &data){
   Rcpp::stop("BAPGD not working yet");
 }
@@ -191,6 +219,7 @@ void Model::backtracking_accelerated_proximal_gradient_step(const Data &data){
 void Model::initialize(Data &data){}
 
 arma::mat Model::hessian(const Data &data){
+  const auto start = std::chrono::high_resolution_clock::now();
   // assumes mean and precision are updated
 
   // FIXME: not sure if this is correct for non-identity link?
@@ -215,10 +244,12 @@ arma::mat Model::hessian(const Data &data){
     }
     H += UwX.t() * dsPsd * UwX;
   }
+  this->logger->profiler.add_call("Model.hessian", std::chrono::high_resolution_clock::now() - start);
   return H;
 }
 
 void Model::prepare_stepsize(Data &data){
+  const auto start = std::chrono::high_resolution_clock::now();
   // NB: this does not find proper Lipshitx bounds, just heuristics,
   // but it find decent values to start from with backtracking.
   // Perhaps this is unnecessary, but it is not too expensive, I believe.
@@ -254,6 +285,7 @@ void Model::prepare_stepsize(Data &data){
 
   this->La = La*factor;
   this->LB = LB*factor;
+  this->logger->profiler.add_call("Model.prepare_stepsize", std::chrono::high_resolution_clock::now() - start);
 }
 
 void Model::reset_stepsize(){
@@ -263,16 +295,19 @@ void Model::reset_stepsize(){
 }
 
 double Model::lambda_max(Data &data){
+  const auto start = std::chrono::high_resolution_clock::now();
   this->penalty->lambda = 1e10;
   this->penalty->large_weights(this->B);
   this->fit(data);
   this->logger->reset();
   this->penalty->unit_weights(this->B);
-  return this->penalty->lambda_max(this->B, this->gB, 1./this->LB);
+  double out = this->penalty->lambda_max(this->B, this->gB, 1./this->LB);
+  this->logger->profiler.add_call("Model.lambda_max", std::chrono::high_resolution_clock::now() - start);
+  return out;
 }
 
 void Model::fit(Data &data){
-
+  const auto start = std::chrono::high_resolution_clock::now();
   this->logger->reset();
   this->momentum = 1.;
   this->aprev = this->a;
@@ -325,6 +360,7 @@ void Model::fit(Data &data){
     );
     // need to recompute precision matrices with new parameters
     if(this->workingCovariance->estimate_parameters) this->update_precision(data);
+    // compute objective
     quad_term = this->quadratic_term(data);
     this->family->dispersion = quad_term / data.n;
     ld_scaling = this->logdet_scaling(data);
@@ -342,6 +378,7 @@ void Model::fit(Data &data){
   this->results["llk"] = llk;
   this->results["rss"] = quad_term;
   this->prepare_results(data);
+  this->logger->profiler.add_call("Model.fit", std::chrono::high_resolution_clock::now() - start);
 }
 
 void Model::prepare_results(const Data &data){
@@ -355,6 +392,7 @@ void Model::prepare_results(const Data &data){
 }
 
 void Model::prepare_ics(const Data &data){
+  const auto start = std::chrono::high_resolution_clock::now();
   arma::rowvec nhat = arma::mat(1, this->B.n_cols, arma::fill::zeros);
   for(uint i=0; i<data.N; i++){
     nhat += arma::sum(data.W[i], 0);
@@ -366,6 +404,8 @@ void Model::prepare_ics(const Data &data){
   mult = fmin(1., mult); // when h is small, we need to avoid going above 1
   mult = fmax(1. / df.n_elem, mult); // when h is large, we need to keep 1 df
   arma::rowvec df_kernel = df * mult;
+
+  results["penalty"] = this->penalty->eval(this->B) * this->penalty->lambda;
 
   results["df"] = arma::accu(df) + data.pu;
   results["df_kernel"] = arma::accu(df_kernel) + data.pu;
@@ -381,6 +421,7 @@ void Model::prepare_ics(const Data &data){
     (double)results["df"] * log((double)results["df_max"]);
   results["ebich"] = -2 * (double)results["llk"] + (double)results["df_logn_kernel"] +
     (double)results["df_kernel"] * log((double)results["df_max"]);
+  this->logger->profiler.add_call("Model.prepare_ics", std::chrono::high_resolution_clock::now() - start);
 }
 
 Rcpp::List Model::save(){
