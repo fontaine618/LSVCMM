@@ -23,6 +23,7 @@
 * Initialize covariance parameters under unpenalized independent model
 * Enable two-step estimation where covariance parameters are fixed after initialization
 * Added profiling to identify expensive functions
+* Improve stepsize adaptation
 
 # Version 0.0.1
 

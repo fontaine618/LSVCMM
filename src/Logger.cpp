@@ -52,6 +52,7 @@ class Logger {
   // per mean iteration data
   std::vector<uint> mean_round;
   std::vector<uint> mean_iteration_within_round;
+  std::vector<double> stepsize;
   std::vector<double> mean_objective;
 
   // per variance iteration data
@@ -78,11 +79,13 @@ public:
   void add_mean_iteration_results(
       uint round,
       uint mean_iteration_within_round,
-      double mean_objective
+      double mean_objective,
+      double stepsize
   ){
     this->mean_round.push_back(round);
     this->mean_iteration_within_round.push_back(mean_iteration_within_round);
     this->mean_objective.push_back(mean_objective);
+    this->stepsize.push_back(stepsize);
   }
 
   void add_variance_iteration_results(
@@ -103,6 +106,7 @@ public:
     mean_round.clear();
     mean_iteration_within_round.clear();
     mean_objective.clear();
+    stepsize.clear();
     variance_round.clear();
     variance_iteration_within_round.clear();
     variance_objective.clear();
@@ -116,6 +120,7 @@ public:
       Rcpp::Named("log_likelihood") = Rcpp::wrap(log_likelihood),
       Rcpp::Named("mean_round") = Rcpp::wrap(mean_round),
       Rcpp::Named("mean_iteration_within_round") = Rcpp::wrap(mean_iteration_within_round),
+      Rcpp::Named("stepsize") = Rcpp::wrap(stepsize),
       Rcpp::Named("mean_objective") = Rcpp::wrap(mean_objective),
       Rcpp::Named("variance_round") = Rcpp::wrap(variance_round),
       Rcpp::Named("variance_iteration_within_round") = Rcpp::wrap(variance_iteration_within_round),

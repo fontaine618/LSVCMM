@@ -44,6 +44,8 @@ Model::Model(
   // Momentum
   this->BB = arma::mat(px, estimated_time.n_elem, arma::fill::zeros);
   this->aa = arma::colvec(pu, arma::fill::zeros);
+  this->Bprev = arma::mat(px, estimated_time.n_elem, arma::fill::zeros);
+  this->aprev = arma::colvec(pu, arma::fill::zeros);
   this->momentum = 1.;
 
   this->logger = new Logger();
@@ -144,30 +146,54 @@ void Model::proximal_gradient_step(Data &data){
   const auto start = std::chrono::high_resolution_clock::now();
   // this->update_mean(data);
   this->update_gradients(data);
+  // check if we overshot last time
+  double cond = arma::accu(this->ga % (this->a - this->aprev));
+  cond += arma::accu(this->gB % (this->B - this->Bprev));
+  if(cond > 0.){
+    this->ssa *= this->control->backtracking_fraction;
+    this->ssB *= this->control->backtracking_fraction;
+  }
+  // store previous values
+  this->aprev = this->a;
+  this->Bprev = this->B;
+  // update
   this->a -= this->ga * this->ssa;
   this->B -= this->gB * this->ssB;
   this->B = this->penalty->proximal(this->B, this->ssB);
   this->logger->profiler.add_call("Model.proximal_gradient_step", std::chrono::high_resolution_clock::now() - start);
 }
 
-void Model::accelerated_proximal_gradient_step(){
+void Model::accelerated_proximal_gradient_step(Data &data){
+  const auto start = std::chrono::high_resolution_clock::now();
   double pt = this->momentum;
   double newt = 0.5 * (1. + sqrt(1 + 4.*pt*pt));
-  // Compute original trajectory (aa, BB)
+  double at = (pt - 1.) / newt;
+  // compute momentum step (new aa, BB)
+  this->aa = this->a + at * (this->a - this->aprev);
+  this->BB = this->B + at * (this->B - this->Bprev);
+  // store current value as previous values
+  this->aprev = this->a;
+  this->Bprev = this->B;
+  // compute gradients at (aa, BB)
+  this->a = this->aa;
+  this->B = this->BB;
+  this->update_gradients(data);
   // gradient step
-  arma::colvec tmpa = this->a - this->ga / this->La;
-  arma::mat tmpB = this->B - this->gB / this->LB;
+  this->a = this->a - this->ga / this->La;
+  this->B = this->B - this->gB / this->LB;
   // prox step
-  tmpB = this->penalty->proximal(tmpB, 1./this->LB);
-
-  // Momentum step (a, B)
-  this->a = tmpa + (pt - 1.) * (tmpa - this->aa) / newt;
-  this->B = tmpB + (pt - 1.) * (tmpB - this->BB) / newt;
-
-  // Store
-  this->aa = tmpa;
-  this->BB = tmpB;
+  this->B = this->penalty->proximal(this->B, 1./this->LB);
+  // store
   this->momentum = newt;
+  // restart ?
+  double cond = arma::accu((this->aa - this->a) % (this->a - this->aprev));
+  cond += arma::accu((this->BB - this->B) % (this->B - this->Bprev));
+  if(cond > 0.){
+    this->momentum = 1.;
+    this->aa = this->aprev;
+    this->BB = this->Bprev;
+  }
+  this->logger->profiler.add_call("Model.accelerated_proximal_gradient_step", std::chrono::high_resolution_clock::now() - start);
 }
 
 void Model::backtracking_proximal_gradient_step(Data &data){
@@ -289,9 +315,9 @@ void Model::prepare_stepsize(Data &data){
 }
 
 void Model::reset_stepsize(){
-  // current hack to get PGD to work
-  this->ssa = 0.1/this->La;
-  this->ssB = 0.1/this->LB;
+  this->ssa = this->control->stepsize_factor / this->La;
+  this->ssB = this->control->stepsize_factor / this->LB;
+  this->momentum = 1.;
 }
 
 double Model::lambda_max(Data &data){
@@ -310,6 +336,10 @@ void Model::fit(Data &data){
   const auto start = std::chrono::high_resolution_clock::now();
   this->logger->reset();
   this->momentum = 1.;
+  // this->a.zeros();
+  // this->B.zeros();
+  this->aa = this->a;
+  this->BB = this->B;
   this->aprev = this->a;
   this->Bprev = this->B;
   this->update_precision(data);
@@ -327,32 +357,33 @@ void Model::fit(Data &data){
   );
   double llk_old = llk;
   for(uint round=0; round<this->control->max_rounds; round++){
+    // this->prepare_stepsize(data);
     this->reset_stepsize();
     double quad_term_old = quad_term;
     uint mean_iter;
     for(mean_iter=0; mean_iter<this->control->max_iter; mean_iter++){
       if(this->control->update_method == "PGD") this->proximal_gradient_step(data);
       else if (this->control->update_method == "BPGD") this->backtracking_proximal_gradient_step(data);
-      else if (this->control->update_method == "APGD") this->accelerated_proximal_gradient_step();
+      else if (this->control->update_method == "APGD") this->accelerated_proximal_gradient_step(data);
       else if (this->control->update_method == "BAPGD") this->backtracking_accelerated_proximal_gradient_step(data);
       else Rcpp::stop("Unknown update method.");
       this->update_mean(data); // needs to be done after updating
       quad_term = this->quadratic_term(data);
       penalty_term = this->penalty->eval(this->B);
       objective = 0.5*quad_term + penalty_term;
-      this->logger->add_mean_iteration_results(round, mean_iter, objective);
+      this->logger->add_mean_iteration_results(round, mean_iter, objective, this->ssB);
       if(fabs(quad_term - quad_term_old) / fabs(quad_term_old)< this->control->rel_tol){
         if(this->control->verbose > 2) Rcpp::Rcout << "         " << round << "." << "M" <<
           "." << mean_iter << ": obj=" << quad_term << "\n";
         break;
       }
       quad_term_old = quad_term;
-      if(objective > objective_old){
-        // Rcpp::Rcout << "         Objective increased\n";
-        this->ssa *= this->control->backtracking_fraction;
-        this->ssB *= this->control->backtracking_fraction;
-      };
-      objective_old = objective;
+      // if(objective > objective_old){
+      //   // Rcpp::Rcout << "         Objective increased\n";
+      //   this->ssa *= this->control->backtracking_fraction;
+      //   this->ssB *= this->control->backtracking_fraction;
+      // };
+      // objective_old = objective;
     }
     // variance update: mean should already be up to date
     uint variance_iter = this->workingCovariance->update_parameters(

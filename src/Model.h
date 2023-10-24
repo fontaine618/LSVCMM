@@ -25,13 +25,13 @@ public:
 
   arma::mat B;
   arma::mat gB;
-  arma::mat BB;
+  arma::mat BB, Bprev;
   double LB = 0.1;
   double ssB = 0.1;
 
   arma::colvec a;
   arma::colvec ga;
-  arma::colvec aa;
+  arma::colvec aa, aprev;
   double La = 0.01;
   double ssa = 0.01;
 
@@ -75,7 +75,7 @@ public:
   void update_gradients(const Data &data);
   arma::mat hessian(const Data &data);
   void proximal_gradient_step(Data &data);
-  void accelerated_proximal_gradient_step();
+  void accelerated_proximal_gradient_step(Data &data);
   void backtracking_proximal_gradient_step(Data &data);
   void backtracking_accelerated_proximal_gradient_step(const Data &data);
   void fit(Data &data);

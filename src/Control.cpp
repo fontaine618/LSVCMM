@@ -17,6 +17,7 @@ public:
   std::string update_method = "PGD";
   double backtracking_fraction = 0.9;
   bool two_step_estimation = true;
+  double stepsize_factor = 0.1;
 
   Control(
     uint max_rounds,
@@ -25,7 +26,8 @@ public:
     uint verbose,
     std::string update_method,
     double backtracking_fraction,
-    bool two_step_estimation
+    bool two_step_estimation,
+    double stepsize_factor
   ){
     this->max_iter = max_iter;
     this->max_rounds = max_rounds;
@@ -34,6 +36,7 @@ public:
     this->update_method = update_method;
     this->backtracking_fraction = backtracking_fraction;
     this->two_step_estimation = two_step_estimation;
+    this->stepsize_factor = stepsize_factor;
   }
 
   Control(){}
@@ -46,6 +49,7 @@ public:
     results["control.update_method"] = this->update_method;
     results["control.backtracking_fraction"] = this->backtracking_fraction;
     results["control.two_step_estimation"] = this->two_step_estimation;
+    results["control.stepsize_factor"] = this->stepsize_factor;
   }
 
 };

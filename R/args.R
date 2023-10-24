@@ -141,7 +141,7 @@ working_covariance_args = function(args){
 
 # ==============================================================================
 DEFAULT_CONTROL_ARGS = list(max_rounds=50, max_iter=1000, rel_tol=1e-6, verbose=1, update_method="PGD",
-                            backtracking_fraction=0.9, two_step=T)
+                            backtracking_fraction=0.9, two_step=T, stepsize_factor=1.)
 
 #' Prepare control arguments
 #'
@@ -157,6 +157,7 @@ DEFAULT_CONTROL_ARGS = list(max_rounds=50, max_iter=1000, rel_tol=1e-6, verbose=
 #' \item{\code{update_method}}{The update method. Currently, only \code{"PGD"} is allowed.}
 #' \item{\code{backtracking_fraction}}{The backtracking fraction. Must be between 0 and 1 (default: \code{0.9}.)}
 #' \item{\code{two_step}}{Whether to estimate the parameters only once. Must be \code{TRUE} (default) or \code{FALSE}.}
+#' \item{\code{stepsize_factor}}{Scaling factor multiplying the inverse Lipschitz constant. Must be positive (default: \code{1.}.)}
 #' \item{\code{...}}{Additional arguments. Currently ignored.}
 #' }
 #'
@@ -169,8 +170,9 @@ control_args = function(args){
   stopifnot(out[["max_iter"]] > 0)
   stopifnot(out[["rel_tol"]] > 0)
   stopifnot(out[["verbose"]] %in% c(0, 1, 2, 3))
-  stopifnot(out[["update_method"]] %in% c("PGD"))
+  stopifnot(out[["update_method"]] %in% c("PGD", "APGD"))
   stopifnot(out[["backtracking_fraction"]] > 0 & out[["backtracking_fraction"]] < 1)
+  stopifnot(out[["stepsize_factor"]] > 0)
   stopifnot(is.logical(out[["two_step"]]))
   return(out)
 }
