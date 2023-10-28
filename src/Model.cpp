@@ -129,6 +129,7 @@ void Model::update_gradients(const Data &data){
   this->ga.zeros();
   uint nt = this->B.n_cols;
   std::vector<arma::colvec> d = this->linkFunction->derivative(data.lp);
+  arma::rowvec wsum = 0. * data.W[0].row(0);
   for(uint i=0; i<data.N; i++){
     arma::colvec dsPsr = d[i] % data.sPsr[i];
     for(uint j=0; j<nt; j++){
@@ -136,9 +137,12 @@ void Model::update_gradients(const Data &data){
       this->gB.col(j) += data.X[i].t() * wdsPsr;
     }
     if(data.pu) this->ga += data.U[i].t() * dsPsr;
+    wsum += arma::sum(data.W[i], 0);
   }
   this->gB *= -1;
   this->ga *= -1;
+  this->gB.each_row() /= wsum;
+  this->ga /= arma::accu(wsum);
   this->logger->profiler.add_call("Model.update_gradients", std::chrono::high_resolution_clock::now() - start);
 }
 
@@ -255,6 +259,11 @@ arma::mat Model::hessian(const Data &data){
   arma::mat H = arma::mat(dim, dim, arma::fill::zeros);
 
   std::vector<arma::colvec> d = this->linkFunction->derivative(data.lp);
+  arma::rowvec wsum = 0. * data.W[0].row(0);
+  for(uint i=0; i<data.N; i++) wsum += arma::sum(data.W[i], 0);
+  double wsumsum = arma::accu(wsum);
+  wsum = arma::sqrt(wsum);
+  wsumsum = sqrt(wsumsum);
   for(uint i=0; i<data.N; i++){
     uint ni = data.W[i].n_rows;
     arma::colvec ds = d[i] / data.s[i];
@@ -262,13 +271,14 @@ arma::mat Model::hessian(const Data &data){
     dsPsd.each_row() %= ds.t();
     dsPsd.each_col() %= ds;
     arma::mat UwX = arma::mat(ni, dim, arma::fill::zeros);
-    if(data.pu) UwX.cols(0, data.pu-1) = data.U[i];
+    if(data.pu) UwX.cols(0, data.pu-1) = data.U[i] / wsumsum;
     for(uint t=0; t<this->nt; t++){
       arma::mat wX = data.X[i];
-      wX.each_col() %= data.W[i].col(t);
+      wX.each_col() %= data.W[i].col(t) / wsum(t);
       UwX.cols(data.pu + t*data.px, data.pu + (t+1)*data.px - 1) = wX;
     }
     H += UwX.t() * dsPsd * UwX;
+
   }
   this->logger->profiler.add_call("Model.hessian", std::chrono::high_resolution_clock::now() - start);
   return H;
@@ -276,7 +286,7 @@ arma::mat Model::hessian(const Data &data){
 
 void Model::prepare_stepsize(Data &data){
   const auto start = std::chrono::high_resolution_clock::now();
-  // NB: this does not find proper Lipshitx bounds, just heuristics,
+  // NB: this does not find proper Lipshitz bounds, just heuristics,
   // but it find decent values to start from with backtracking.
   // Perhaps this is unnecessary, but it is not too expensive, I believe.
   this->update_mean(data);
@@ -347,7 +357,7 @@ void Model::fit(Data &data){
   double quad_term = this->quadratic_term(data);
   double penalty_term = this->penalty->eval(this->B);
   double objective = 0.5*quad_term + penalty_term;
-  double objective_old = objective;
+  // double objective_old = objective;
   double ld_scaling = this->logdet_scaling(data);
   double ld_precision = this->logdet_precision(data);
   double ld_dispersion = this->logdet_dispersion(data);
@@ -378,12 +388,6 @@ void Model::fit(Data &data){
         break;
       }
       quad_term_old = quad_term;
-      // if(objective > objective_old){
-      //   // Rcpp::Rcout << "         Objective increased\n";
-      //   this->ssa *= this->control->backtracking_fraction;
-      //   this->ssB *= this->control->backtracking_fraction;
-      // };
-      // objective_old = objective;
     }
     // variance update: mean should already be up to date
     uint variance_iter = this->workingCovariance->update_parameters(

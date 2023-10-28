@@ -1,10 +1,11 @@
 # To do list
 
-[ ] Improve AR1 estimation
+[ ] Improve AR1 estimation (also, check if two-step is fine)
 [ ] Boundary rescaling for all kernels (only gaussian currenlty)
-[ ] Disable profiling
+[ ] Disable profiling (or with a flag)
 [ ] Instead of rescaling, change gradient so it is scaled by the total weight
   - make sure hessian also is scaled by the same thing
+  - I did a first attempt, but need to check if it is right, I think it might be off a bit (sqrt, etc.)
 
 
 # Version 0.0.2
@@ -24,6 +25,7 @@
 * Enable two-step estimation where covariance parameters are fixed after initialization
 * Added profiling to identify expensive functions
 * Improve stepsize adaptation
+* Gradient and Hessian rescaling using total weights
 
 # Version 0.0.1
 
