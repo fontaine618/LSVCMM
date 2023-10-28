@@ -138,6 +138,7 @@ lsvcmm = function(
     unscaled_time=time$unscaled, # the corresponding values in the original scale
     range_time=time$range # sufficient to map to scaled time
   )
+  calls = NULL
   if(return_models){
     res$models = fit
     pf = res$models[[length(res$models)]]$log$profiler

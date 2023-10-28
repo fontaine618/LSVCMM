@@ -42,14 +42,15 @@ This is a basic example which shows you how to solve a common problem:
 
 ```{r example, results='hide'}
 library(LSVCMM)
-data = generate_synthetic_data()
+instance = generate_synthetic_data()
 fit = lsvcmm(
-  data=data$data, 
+  data=instance$data, 
   response="response",
   subject="subject_id",
   time="time",
   vc_covariates="group",
-  kernel=list(scale=c(0.3, 0.5, 1.))
+  kernel=list(scale=c(0.1, 0.2, 0.3)),
+  penalty=list(adaptive=0.5, penalize_intercept=T)
 )
 ```
 
@@ -63,8 +64,8 @@ ggplot() +
   theme_minimal() + labs(color="Kernel scale", x="Reg. parameter", y="EBIC")
 
 i = which.min(fit$results$ebich)
-fit$vc_path[,,i]
-data$true_values
+t(fit$vc_path[,,i])
+instance$true_values
 fit$results[i, ]
 ```
 

@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-Last updated: *Sep-18-2023*
+Last updated: *Oct-28-2023*
 
 # LSVCMM
 
@@ -23,7 +23,7 @@ devtools::install_github("fontaine618/LSVCMM")
 ## Reference
 
 For details on the LSVCMM method, refer to the [Draft
-manuscript](bit.ly/lsvcmm).
+manuscript](https://bit.ly/lsvcmm).
 
 ## Example
 
@@ -31,14 +31,15 @@ This is a basic example which shows you how to solve a common problem:
 
 ``` r
 library(LSVCMM)
-data = generate_synthetic_data()
+instance = generate_synthetic_data()
 fit = lsvcmm(
-  data=data$data, 
+  data=instance$data, 
   response="response",
   subject="subject_id",
   time="time",
   vc_covariates="group",
-  kernel=list(scale=c(0.3, 0.5, 1.))
+  kernel=list(scale=c(0.1, 0.2, 0.3)),
+  penalty=list(adaptive=0.5, penalize_intercept=T)
 )
 ```
 
@@ -57,14 +58,20 @@ ggplot() +
 ``` r
 
 i = which.min(fit$results$ebich)
-fit$vc_path[,,i]
-#>             [,1]        [,2]        [,3]        [,4]        [,5]       [,6]
-#> [1,]  0.03275999 -0.01016253 -0.06624197 -0.09219969 -0.09158987 -0.1120982
-#> [2,] -0.20019829  0.00000000  0.00000000  0.00000000  0.03315548  0.1962638
-#>            [,7]       [,8]       [,9]      [,10]     [,11]
-#> [1,] -0.1921048 -0.3012465 -0.3340842 -0.1740154 0.2178366
-#> [2,]  0.8923241  1.0984185  1.2979464  1.0967269 0.4775085
-data$true_values
+t(fit$vc_path[,,i])
+#>              [,1]       [,2]
+#>  [1,]  0.00000000 -0.1905021
+#>  [2,]  0.00000000  0.0000000
+#>  [3,]  0.00000000  0.0000000
+#>  [4,] -0.16977513  0.0000000
+#>  [5,]  0.00000000  0.0000000
+#>  [6,] -0.04898868  0.1558412
+#>  [7,] -0.48785789  1.2715141
+#>  [8,] -0.31260794  1.2169534
+#>  [9,]  0.00000000  0.7558545
+#> [10,] -0.22549099  1.0335752
+#> [11,]  0.00000000  0.9595684
+instance$true_values
 #>    time b0        b1
 #> 1   0.0  0 0.0000000
 #> 2   0.1  0 0.0000000
@@ -79,17 +86,21 @@ data$true_values
 #> 11  1.0  0 0.9996646
 fit$results[i, ]
 #>           llk      rss family.dispersion family.name
-#> 163 -1213.451 872.9491          1.165486    gaussian
+#> 290 -1219.911 956.1185          1.276527    gaussian
 #>                    penalty.name penalty.alpha penalty.lambda penalty.adaptive
-#> 163 adaptive_sparse_group_lasso             1      0.5654141                0
+#> 290 adaptive_sparse_group_lasso             1   0.0005697523              0.5
 #>     penalty.penalize_intercept link_function.name working_covariance.estimate
-#> 163                      FALSE           identity                        TRUE
+#> 290                       TRUE           identity                       FALSE
 #>     working_covariance.ratio working_covariance.name kernel.name kernel.scale
-#> 163                0.7461958       compound_symmetry    gaussian          0.5
+#> 290                0.3703248       compound_symmetry    gaussian          0.3
 #>     control.max_iter control.max_rounds control.rel_tol control.verbose
-#> 163             1000                 50           1e-06               1
-#>     control.update_method control.backtracking_fraction df df_kernel df_logn
-#> 163                   PGD                           0.9 19  1.949019  118.12
-#>     df_logn_kernel df_max      aic   aich      bic     bich     ebic    ebich
-#> 163       12.11674     22 2464.901 2430.8 2545.022 2439.018 2603.751 2445.043
+#> 290             1000                 50           1e-06               1
+#>     control.update_method control.backtracking_fraction
+#> 290                   PGD                           0.9
+#>     control.two_step_estimation control.stepsize_factor      penalty df
+#> 290                        TRUE                       1 2.869372e-06 12
+#>     df_kernel  df_logn df_logn_kernel df_max      aic     aich      bic
+#> 290  2.051598 78.72887          13.46     22 2463.822 2443.925 2518.551
+#>         bich     ebic    ebich
+#> 290 2453.282 2555.643 2459.623
 ```
