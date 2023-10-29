@@ -26,6 +26,7 @@
 * Added profiling to identify expensive functions
 * Improve stepsize adaptation
 * Gradient and Hessian rescaling using total weights
+* Added sqrt*sqrt missing value mechanism
 
 # Version 0.0.1
 

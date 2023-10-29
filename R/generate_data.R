@@ -109,6 +109,12 @@ generate_synthetic_data = function(
     omat = matrix(T, n_subjects, n_timepoints)
     for (i in 1:n_subjects) if(n_missing[i]>0) omat[i, starting[i]:ending[i]] = F
   }
+  if(missingness=="sqrt"){
+    obs_t = sample.int( n_timepoints, round(n_timepoints*sqrt(1-prop_observed)),F)
+    obs_s = sample.int( n_subjects, round(n_subjects*sqrt(1-prop_observed)),F)
+    omat = matrix(T, n_subjects, n_timepoints)
+    omat[obs_s, obs_t] = F
+  }
 
   data_full = data.frame(
     response=as.vector(ymat),
