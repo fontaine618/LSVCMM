@@ -118,7 +118,7 @@ generate_synthetic_data = function(
   if(missingness=="fixed_uniform"){
     n_obs = round(n_timepoints*prop_observed)
     omat = matrix(F, n_subjects, n_timepoints)
-    for (i in 1:n_subjects) omat[i, sample.int(n_timepoints, n_obs, replace=F)] = T
+    for (i in 1:n_subjects) omat[i, sample.int(n_timepoints, n_obs)] = T
   }
 
   data_full = data.frame(
@@ -159,6 +159,9 @@ generate_synthetic_data = function(
     data_wide %>% select(subject_id, group),
     data.frame(Yhat)
   )
+
+  colnames(data_wide_imputed) = colnames(data_wide)
+
 
   true_values = data.frame(
     time=t0,
