@@ -118,7 +118,7 @@ generate_synthetic_data = function(
   if(missingness=="fixed_uniform"){
     n_obs = round(n_timepoints*prop_observed)
     omat = matrix(F, n_subjects, n_timepoints)
-    for (i in 1:n_subjects) omat[i, sample.int(n_timepoints, n_obs)] = T
+    for (i in 1:n_subjects) omat[i, sample.int(n_timepoints, n_obs, replace=F)] = T
   }
 
   data_full = data.frame(
