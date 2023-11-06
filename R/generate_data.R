@@ -130,13 +130,12 @@ generate_synthetic_data = function(
   )
   data_long = data_full %>% dplyr::filter(observed) %>% dplyr::select(-observed)
 
-  data_wide = data_long %>% tidyr::pivot_wider(
-    id_cols=c("subject_id", "group"),
-    names_from="time",
-    values_from="response",
-    names_prefix="t",
-    names_sort=TRUE
-  ) %>% dplyr::arrange(subject_id)
+  data_wide = dplyr::bind_cols(
+    seq(n_subjects),
+    group,
+    data.frame(ymat)
+  )
+  colnames(data_wide) = c("subject_id", "group", paste0("t", t0))
 
   # build amtrix with missing values
   Y = ymat
@@ -159,7 +158,6 @@ generate_synthetic_data = function(
     data_wide %>% select(subject_id, group),
     data.frame(Yhat)
   )
-
   colnames(data_wide_imputed) = colnames(data_wide)
 
 
