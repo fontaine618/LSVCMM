@@ -22,19 +22,20 @@ confidence_band = function(
     pointwise_confidence=1-2*out$p,
     estimate=obj$vc[var, ],
     mean=apply(samples, 2, mean),
-    median=apply(samples, 2, median),
+    median=apply(samples, 2, stats::median),
     prop0=apply(samples, 2, function(x) mean(x==0)),
     estimated_time=obj$unscaled_time,
     level=proportion_samples_in_band(out$L, out$U, samples),
     excludes_zero=(out$L>0) | (out$U<0),
     pval=pval,
-    pval.adj=p.adjust(pval, method="BH")
+    pval.adj=stats::p.adjust(pval, method="BH")
   )
 
   return(out)
 }
 
 
+#' @importFrom pracma logseq
 quantile_confidence_band = function(samples, level){
   nc = dim(samples)[2] * dim(samples)[1]
   minp = level / (2*nc)
@@ -53,7 +54,7 @@ quantile_confidence_band = function(samples, level){
 
 
 pointwise_quantile_confidence_band = function(p, samples){
-  qs = apply(samples, 1:2, quantile, c(p, 1-p)) # 2 x len(var) x nt
+  qs = apply(samples, 1:2, stats::quantile, c(p, 1-p)) # 2 x len(var) x nt
   L = qs[1,,] # NB this may be a vector or a matrix, cannot use drop=F ...
   U = qs[2,,]
   return(list(L=L, U=U, p=p))

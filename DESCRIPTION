@@ -15,7 +15,8 @@ Imports:
     refund,
     tidyr,
     tidyselect,
-    RcppProgress (>= 0.4.2)
+    RcppProgress (>= 0.4.2),
+    pracma
 LinkingTo: Rcpp, RcppArmadillo, RcppProgress
 Authors@R: 
     person("Simon", "Fontaine", , "simfont@umich.edu", role = c("aut", "cre"))

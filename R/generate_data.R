@@ -141,15 +141,19 @@ generate_synthetic_data = function(
   # build amtrix with missing values
   Y = ymat
   Y[!omat] = NA
-  # impute row mean
-  Ymean = rowMeans(Y, na.rm=T)
-  Yhat = matrix(Ymean, nrow=n_subjects, ncol=n_timepoints, byrow=F)
-  Yhat[!is.na(Y)] = Y[!is.na(Y)]
   # try to impute with FPCA, if it fails, it reverts to mean imputation
+  impute_mean = T
   try({
     Yhat = refund::fpca.sc(Y=Y, argvals=t0, nbasis=4)$Yhat
     Yhat[!is.na(Y)] = Y[!is.na(Y)]
-  })
+    impute_mean = F
+  }, silent=T)
+  # impute row mean
+  if(impute_mean){
+    Ymean = rowMeans(Y, na.rm=T)
+    Yhat = matrix(Ymean, nrow=n_subjects, ncol=n_timepoints, byrow=F)
+    Yhat[!is.na(Y)] = Y[!is.na(Y)]
+  }
 
   data_wide_imputed = dplyr::bind_cols(
     data_wide %>% select(subject_id, group),

@@ -23,7 +23,54 @@ lsvcmm.boot(
 )
 }
 \arguments{
-\item{n_samples}{}
+\item{data}{A data frame containing the variables in the model.}
+
+\item{response}{The name of the response variable in \code{data}.}
+
+\item{subject}{The name of the subject variable in \code{data}.}
+
+\item{time}{The name of the time variable in \code{data}.}
+
+\item{vc_covariates}{The names of the varying coefficient covariates in \code{data}.}
+
+\item{nvc_covariates}{The names of the non-varying coefficient covariates in \code{data}.}
+
+\item{offset}{The name of the offset variable in \code{data}.}
+
+\item{add_intercept}{Whether to add an intercept to the model.}
+
+\item{estimated_time}{The time points at which to estimate the varying coefficients. If missing, all observed time points are used.}
+
+\item{family}{A list of arguments for the response distribution. See \code{\link{family_args}}.}
+
+\item{kernel}{A list of arguments for the kernel. See \code{\link{kernel_args}}.}
+
+\item{penalty}{A list of arguments for the penalty. See \code{\link{penalty_args}}.}
+
+\item{working_covariance}{A list of arguments for the working covariance. See \code{\link{working_covariance_args}}.}
+
+\item{control}{A list of arguments for the control parameters. See \code{\link{control_args}}.}
+
+\item{n_samples}{Number of bootstrap samples to compute}
+}
+\value{
+A list containing the following elements:
+\describe{
+\item{family}{A list of arguments for the response distribution. See \code{\link{family_args}}.}
+\item{kernel}{A list of arguments for the kernel. See \code{\link{kernel_args}}.}
+\item{penalty}{A list of arguments for the penalty. See \code{\link{penalty_args}}.}
+\item{working_covariance}{A list of arguments for the working covariance. See \code{\link{working_covariance_args}}.}
+\item{control}{A list of arguments for the control parameters. See \code{\link{control_args}}.}
+\item{results}{A data frame containing the results of the optimization. Each row is a model resulting from a particular tuning parameter combination.}
+\item{nvc_boot}{A matrix containing the estimated non-varying coefficient path of dimension (\code{p_u}, \code{n_samples}).}
+\item{vc_boot}{An array containing the estimated varying coefficient path of dimension (\code{p_x}, \code{n_timepoints}, \code{n_samples}).}
+\item{scaled_time}{The time points at which the varying coefficients were estimated.}
+\item{unscaled_time}{The corresponding values in the original scale.}
+\item{range_time}{The range of the time points.}
+\item{full_model}{The model fitted on all data.}
+\item{nvc}{A vector containing the estimated non-varying coefficient.}
+\item{vc}{An matrix containing the estimated varying coefficient.}
+}
 }
 \description{
 Title

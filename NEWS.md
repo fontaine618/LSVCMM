@@ -1,6 +1,5 @@
 # To do list
 
-[ ] Bootstrap
 [ ] Improve AR1 estimation (also, check if two-step is fine)
 [ ] Boundary rescaling for all kernels (only gaussian currenlty)
 [ ] Disable profiling (or with a flag)
