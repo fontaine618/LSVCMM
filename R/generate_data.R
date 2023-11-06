@@ -115,6 +115,11 @@ generate_synthetic_data = function(
     omat = matrix(T, n_subjects, n_timepoints)
     omat[obs_s, obs_t] = F
   }
+  if(missingness=="fixed_uniform"){
+    n_obs = round(n_timepoints*prop_observed)
+    omat = matrix(F, n_subjects, n_timepoints)
+    for (i in 1:n_subjects) omat[i, sample.int(n_timepoints, n_obs)] = T
+  }
 
   data_full = data.frame(
     response=as.vector(ymat),
@@ -133,9 +138,18 @@ generate_synthetic_data = function(
     names_sort=TRUE
   ) %>% dplyr::arrange(subject_id)
 
-  Y = data_wide %>% dplyr::select(dplyr::starts_with("t")) %>% as.matrix
-  Yhat = refund::fpca.sc(Y=Y, argvals=t0, nbasis=4)$Yhat
+  # build amtrix with missing values
+  Y = ymat
+  Y[!omat] = NA
+  # impute row mean
+  Ymean = rowMeans(Y, na.rm=T)
+  Yhat = matrix(Ymean, nrow=n_subjects, ncol=n_timepoints, byrow=F)
   Yhat[!is.na(Y)] = Y[!is.na(Y)]
+  # try to impute with FPCA, if it fails, it reverts to mean imputation
+  try({
+    Yhat = refund::fpca.sc(Y=Y, argvals=t0, nbasis=4)$Yhat
+    Yhat[!is.na(Y)] = Y[!is.na(Y)]
+  })
 
   data_wide_imputed = dplyr::bind_cols(
     data_wide %>% select(subject_id, group),

@@ -1,5 +1,6 @@
 # To do list
 
+[ ] Bootstrap
 [ ] Improve AR1 estimation (also, check if two-step is fine)
 [ ] Boundary rescaling for all kernels (only gaussian currenlty)
 [ ] Disable profiling (or with a flag)
@@ -7,6 +8,9 @@
   - make sure hessian also is scaled by the same thing
   - I did a first attempt, but need to check if it is right, I think it might be off a bit (sqrt, etc.)
 
+# Version 0.0.3
+
+* Added bootstrap and simultaneous confidence bands.
 
 # Version 0.0.2
 

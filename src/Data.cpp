@@ -84,10 +84,10 @@ Data::Data(
   this->y = y;
   this->t = t;
   this->o = o;
-  this->P = P;
-  this->W = W;
   this->U = U;
   this->X = X;
+  this->P = P;
+  this->W = W;
   this->I = I;
   this->px = X[0].n_cols;
   this->pu = U[0].n_cols;
@@ -95,6 +95,15 @@ Data::Data(
   uint n = 0;
   for(uint i=0; i<y.size(); i++) n += y[i].n_elem;
   this->n = n;
+
+  // initialize
+  this->r = std::vector<arma::colvec>(this->N);
+  this->m = std::vector<arma::colvec>(this->N);
+  this->s = std::vector<arma::colvec>(this->N);
+  this->lp = std::vector<arma::colvec>(this->N);
+  this->sr = std::vector<arma::colvec>(this->N);
+  this->sPsr = std::vector<arma::colvec>(this->N);
+  this->foldid = arma::uvec(N, arma::fill::zeros);
 }
 
 void Data::prepare_folds(uint nfolds){

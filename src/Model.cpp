@@ -352,8 +352,8 @@ void Model::fit(Data &data){
   this->BB = this->B;
   this->aprev = this->a;
   this->Bprev = this->B;
-  this->update_precision(data);
   this->update_mean(data);
+  this->update_precision(data);
   double quad_term = this->quadratic_term(data);
   double penalty_term = this->penalty->eval(this->B);
   double objective = 0.5*quad_term + penalty_term;
