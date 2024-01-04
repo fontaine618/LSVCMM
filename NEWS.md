@@ -10,6 +10,8 @@
 # Version 0.0.3
 
 * Added bootstrap and simultaneous confidence bands.
+* Added observation weights
+* Added resampling within subjects for bootstrap
 
 # Version 0.0.2
 

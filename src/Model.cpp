@@ -71,7 +71,7 @@ void Model::update_mean(Data &data){
   data.m = this->linkFunction->eval(data.lp);
   for(uint i=0; i<data.N; i++){
     data.r[i] = data.y[i] - data.m[i];
-    data.s[i] = arma::sqrt(this->family->unit_variance(data.m[i]));
+    data.s[i] = arma::sqrt(this->family->unit_variance(data.m[i]) % data.w[i]);
     data.sr[i] = data.r[i] / data.s[i];
     data.sPsr[i] = (data.P[i] * data.sr[i]) / data.s[i];
   }

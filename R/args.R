@@ -201,6 +201,7 @@ data_args = function(
     vc_covariates=NULL,
     nvc_covariates=NULL,
     offset=NULL,
+    weight=NULL,
     add_intercept=T
 ){
   n = nrow(data)
@@ -212,6 +213,8 @@ data_args = function(
   time = matrix(data[[time]], nrow=n, ncol=1)
   if(!is.null(offset)) offset = matrix(data[[offset]], nrow=n, ncol=1)
   else offset = matrix(0, nrow=n, ncol=1)
+  if(!is.null(weight)) weight = matrix(data[[weight]], nrow=n, ncol=1)
+  else weight = matrix(1, nrow=n, ncol=1)
   if(!is.null(vc_covariates)) vc_covariates = as.matrix(data[, vc_covariates, drop=F])
   else vc_covariates = matrix(0, nrow=n, ncol=0)
   if(!is.null(nvc_covariates)) nvc_covariates = as.matrix(data[, nvc_covariates, drop=F])
@@ -222,6 +225,7 @@ data_args = function(
     subject=subject,
     time=time,
     offset=offset,
+    weight=weight,
     vc_covariates=vc_covariates,
     nvc_covariates=nvc_covariates
   ))

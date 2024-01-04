@@ -7,6 +7,7 @@
 #' @param vc_covariates The names of the varying coefficient covariates in \code{data}.
 #' @param nvc_covariates The names of the non-varying coefficient covariates in \code{data}.
 #' @param offset The name of the offset variable in \code{data}.
+#' @param weight The name of the weight variable in \code{data}.
 #' @param add_intercept Whether to add an intercept to the model.
 #' @param estimated_time The time points at which to estimate the varying coefficients. If missing, all observed time points are used.
 #' @param family A list of arguments for the response distribution. See \code{\link{family_args}}.
@@ -53,6 +54,7 @@ lsvcmm = function(
   vc_covariates=NULL,
   nvc_covariates=NULL,
   offset=NULL,
+  weight=NULL,
   add_intercept=T,
   estimated_time=NULL,
   family=DEFAULT_FAMILY_ARGS,
@@ -67,7 +69,7 @@ lsvcmm = function(
   penalty = penalty_args(penalty)
   working_covariance = working_covariance_args(working_covariance)
   control = control_args(control)
-  data = data_args(data, response, subject, time, vc_covariates, nvc_covariates, offset, add_intercept)
+  data = data_args(data, response, subject, time, vc_covariates, nvc_covariates, offset, weight, add_intercept)
   time = time_args(data$t, estimated_time)
   # CALL
   fit = LSVCMM(
@@ -77,6 +79,7 @@ lsvcmm = function(
     vcm_covariates=data$vc_covariates,
     fixed_covariates=data$nvc_covariates,
     offset=data$offset,
+    weight=data$weight,
 
     family_name=family$response,
     link=family$link,

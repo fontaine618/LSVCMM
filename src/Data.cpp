@@ -42,12 +42,14 @@ Data::Data(
   const arma::colvec & response_time, // n x 1 in R, but normally in [0,1] is scale_time=T from outside
   const arma::mat & vcm_covariates, // n x px in R, but typically 0/1 (vc intercept has to be added outside)
   const arma::mat & fixed_covariates, // n x pu in R, need to copy outside if constant, but allows changing covariates
-  const arma::colvec & offset // n x 1 in R, but normally in [0,1] is scale_time=T from outside
+  const arma::colvec & offset, // n x 1 in R, but normally in [0,1] is scale_time=T from outside
+  const arma::colvec & weight // n x 1 in R, but normally in [0,1] is scale_time=T from outside
 ){
   // to list format and initialize object
   this->y = to_list_by_subject(subject, response);
   this->t = to_list_by_subject(subject, response_time);
   this->o = to_list_by_subject(subject, offset);
+  this->w = to_list_by_subject(subject, weight);
   this->U = to_list_by_subject(subject, fixed_covariates);
   this->X = to_list_by_subject(subject, vcm_covariates);
 
@@ -74,6 +76,7 @@ Data::Data(
   const std::vector<arma::colvec> & y,
   const std::vector<arma::colvec> & t,
   const std::vector<arma::colvec> & o,
+  const std::vector<arma::colvec> & w,
   const std::vector<arma::mat> & X,
   const std::vector<arma::mat> & U,
   const std::vector<arma::mat> & P,
@@ -84,6 +87,7 @@ Data::Data(
   this->y = y;
   this->t = t;
   this->o = o;
+  this->w = w;
   this->U = U;
   this->X = X;
   this->P = P;
@@ -129,6 +133,7 @@ Data Data::get(arma::uvec ids){
   std::vector<arma::colvec> y(N);
   std::vector<arma::colvec> t(N);
   std::vector<arma::colvec> o(N);
+  std::vector<arma::colvec> w(N);
   std::vector<arma::mat> X(N);
   std::vector<arma::mat> U(N);
   std::vector<arma::mat> P(N);
@@ -138,13 +143,14 @@ Data Data::get(arma::uvec ids){
     y[i] = this->y[ids[i]];
     t[i] = this->t[ids[i]];
     o[i] = this->o[ids[i]];
+    w[i] = this->w[ids[i]];
     X[i] = this->X[ids[i]];
     U[i] = this->U[ids[i]];
     P[i] = this->P[ids[i]];
     I[i] = this->I[ids[i]];
     W[i] = this->W[ids[i]];
   }
-  return Data(y, t, o, X, U, P, I, W);
+  return Data(y, t, o, w, X, U, P, I, W);
 }
 
 Data Data::get_fold(uint fold){
@@ -157,9 +163,38 @@ Data Data::get_other_folds(uint fold){
   return this->get(ids);
 }
 
-Data Data::resample(){
+Data Data::resample(bool resample_within_subject){
   uint N = this->y.size();
   arma::ivec ids = arma::randi(N, arma::distr_param(0, N-1));
   arma::uvec ids2 = arma::conv_to<arma::uvec>::from(ids);
-  return this->get(ids2);
+  Data out = this->get(ids2);
+  if(resample_within_subject) return out.resample_within_subject();
+  return out;
+}
+
+Data Data::resample_within_subject(){
+  std::vector<arma::colvec> y(N);
+  std::vector<arma::colvec> t(N);
+  std::vector<arma::colvec> o(N);
+  std::vector<arma::colvec> w(N);
+  std::vector<arma::mat> X(N);
+  std::vector<arma::mat> U(N);
+  std::vector<arma::mat> P(N);
+  std::vector<arma::mat> I(N);
+  std::vector<arma::mat> W(N);
+  for(uint i=0; i<N; i++){
+    uint n = this->y[i].n_elem;
+    arma::ivec ids_ = arma::randi(n, arma::distr_param(0, n-1));
+    arma::uvec ids = arma::conv_to<arma::uvec>::from(ids_);
+    y[i] = this->y[i].elem(ids);
+    t[i] = this->t[i].elem(ids);
+    o[i] = this->o[i].elem(ids);
+    w[i] = this->w[i].elem(ids);
+    X[i] = this->X[i].rows(ids);
+    U[i] = this->U[i].rows(ids);
+    P[i] = this->P[i].rows(ids);
+    I[i] = this->I[i].rows(ids);
+    W[i] = this->W[i].rows(ids);
+  }
+  return Data(y, t, o, w, X, U, P, I, W);
 }

@@ -22,6 +22,7 @@ Rcpp::List LSVCMM(
     arma::mat &vcm_covariates,
     arma::mat &fixed_covariates,
     arma::colvec &offset,
+    arma::colvec &weight,
     std::string family_name, // FAMILY
     std::string link,
     std::string kernel_name, // KERNEL
@@ -68,7 +69,8 @@ Rcpp::List LSVCMM(
     response_time,
     vcm_covariates,
     fixed_covariates,
-    offset
+    offset,
+    weight
   );
 
   if(control->verbose) Rcpp::Rcout << "[LSVCMM] Initializing interpolator \n";

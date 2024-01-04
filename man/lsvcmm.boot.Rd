@@ -12,6 +12,7 @@ lsvcmm.boot(
   vc_covariates = NULL,
   nvc_covariates = NULL,
   offset = NULL,
+  weight = NULL,
   add_intercept = T,
   estimated_time = NULL,
   family = DEFAULT_FAMILY_ARGS,
@@ -19,7 +20,8 @@ lsvcmm.boot(
   penalty = DEFAULT_PENALTY_ARGS,
   working_covariance = DEFAULT_WORKING_COVARIANCE_ARGS,
   control = DEFAULT_CONTROL_ARGS,
-  n_samples = 1000
+  n_samples = 1000,
+  resample_within_subject = F
 )
 }
 \arguments{
@@ -37,6 +39,8 @@ lsvcmm.boot(
 
 \item{offset}{The name of the offset variable in \code{data}.}
 
+\item{weight}{The name of the weight variable in \code{data}.}
+
 \item{add_intercept}{Whether to add an intercept to the model.}
 
 \item{estimated_time}{The time points at which to estimate the varying coefficients. If missing, all observed time points are used.}
@@ -52,6 +56,8 @@ lsvcmm.boot(
 \item{control}{A list of arguments for the control parameters. See \code{\link{control_args}}.}
 
 \item{n_samples}{Number of bootstrap samples to compute}
+
+\item{resample_within_subject}{Whether to resample within subjects}
 }
 \value{
 A list containing the following elements:

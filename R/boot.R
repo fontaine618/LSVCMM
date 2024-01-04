@@ -7,6 +7,7 @@
 #' @param vc_covariates The names of the varying coefficient covariates in \code{data}.
 #' @param nvc_covariates The names of the non-varying coefficient covariates in \code{data}.
 #' @param offset The name of the offset variable in \code{data}.
+#' @param weight The name of the weight variable in \code{data}.
 #' @param add_intercept Whether to add an intercept to the model.
 #' @param estimated_time The time points at which to estimate the varying coefficients. If missing, all observed time points are used.
 #' @param family A list of arguments for the response distribution. See \code{\link{family_args}}.
@@ -15,6 +16,7 @@
 #' @param working_covariance A list of arguments for the working covariance. See \code{\link{working_covariance_args}}.
 #' @param control A list of arguments for the control parameters. See \code{\link{control_args}}.
 #' @param n_samples Number of bootstrap samples to compute
+#' @param resample_within_subject Whether to resample within subjects
 #'
 #' @return A list containing the following elements:
 #' \describe{
@@ -44,6 +46,7 @@ lsvcmm.boot = function(
     vc_covariates=NULL,
     nvc_covariates=NULL,
     offset=NULL,
+    weight=NULL,
     add_intercept=T,
     estimated_time=NULL,
     family=DEFAULT_FAMILY_ARGS,
@@ -51,7 +54,8 @@ lsvcmm.boot = function(
     penalty=DEFAULT_PENALTY_ARGS,
     working_covariance=DEFAULT_WORKING_COVARIANCE_ARGS,
     control=DEFAULT_CONTROL_ARGS,
-    n_samples=1000
+    n_samples=1000,
+    resample_within_subject=F
 ){
   family = family_args(family)
   kernel = kernel_args(kernel)
@@ -60,7 +64,7 @@ lsvcmm.boot = function(
   if(length(penalty$lambda) != 1) stop("lsvcmm.boot can only take one lamba value")
   working_covariance = working_covariance_args(working_covariance)
   control = control_args(control)
-  data = data_args(data, response, subject, time, vc_covariates, nvc_covariates, offset, add_intercept)
+  data = data_args(data, response, subject, time, vc_covariates, nvc_covariates, offset, weight, add_intercept)
   time = time_args(data$t, estimated_time)
   boot = LSVCMM_Bootstrap(
     response=data$response,
@@ -69,6 +73,7 @@ lsvcmm.boot = function(
     vcm_covariates=data$vc_covariates,
     fixed_covariates=data$nvc_covariates,
     offset=data$offset,
+    weight=data$weight,
 
     family_name=family$response,
     link=family$link,
@@ -99,7 +104,8 @@ lsvcmm.boot = function(
     two_step_estimation=control$two_step,
     stepsize_factor=control$stepsize_factor,
 
-    n_samples=n_samples
+    n_samples=n_samples,
+    resample_within_subject=resample_within_subject
   )
   # return(boot)
   # SUMMARIZE RESULTS

@@ -11,7 +11,7 @@ public:
 
   // Input data
   std::vector<arma::mat> X, U;
-  std::vector<arma::colvec> y, t, o;
+  std::vector<arma::colvec> y, t, o, w;
   uint px, pu, n, N;
   // Computed later
   std::vector<arma::mat> P, W, I;
@@ -27,7 +27,8 @@ public:
     const arma::colvec & response_time,
     const arma::mat & vcm_covariates,
     const arma::mat & fixed_covariates,
-    const arma::colvec & offset
+    const arma::colvec & offset,
+    const arma::colvec & weight
   );
 
   // Helper to subset or resample
@@ -35,6 +36,7 @@ public:
     const std::vector<arma::colvec> & y,
     const std::vector<arma::colvec> & t,
     const std::vector<arma::colvec> & o,
+    const std::vector<arma::colvec> & w,
     const std::vector<arma::mat> & X,
     const std::vector<arma::mat> & U,
     const std::vector<arma::mat> & P,
@@ -50,7 +52,9 @@ public:
 
   Data get_other_folds(uint fold);
 
-  Data resample();
+  Data resample(bool resample_within_subject);
+
+  Data resample_within_subject();
 
 };
 

@@ -27,6 +27,7 @@ Rcpp::List LSVCMM_Bootstrap(
     arma::mat &vcm_covariates,
     arma::mat &fixed_covariates,
     arma::colvec &offset,
+    arma::colvec &weight,
     std::string family_name, // FAMILY
     std::string link,
     std::string kernel_name, // KERNEL
@@ -51,7 +52,8 @@ Rcpp::List LSVCMM_Bootstrap(
     double backtracking_fraction,
     bool two_step_estimation,
     double stepsize_factor,
-    uint n_samples
+    uint n_samples,
+    bool resample_within_subject
 ){
   Control* control = new Control(
     max_rounds,
@@ -71,7 +73,8 @@ Rcpp::List LSVCMM_Bootstrap(
     response_time,
     vcm_covariates,
     fixed_covariates,
-    offset
+    offset,
+    weight
   );
 
   if(control->verbose) Rcpp::Rcout << "[LSVCMM] Initializing interpolator \n";
@@ -159,7 +162,7 @@ Rcpp::List LSVCMM_Bootstrap(
     model->a = a;
     // set seed
     set_seed_r(b);
-    Data rdata = data.resample();
+    Data rdata = data.resample(resample_within_subject);
     model->fit(rdata);
     models[b] = model->save();
     model->logger->reset();

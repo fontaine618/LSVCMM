@@ -12,6 +12,7 @@ lsvcmm(
   vc_covariates = NULL,
   nvc_covariates = NULL,
   offset = NULL,
+  weight = NULL,
   add_intercept = T,
   estimated_time = NULL,
   family = DEFAULT_FAMILY_ARGS,
@@ -36,6 +37,8 @@ lsvcmm(
 \item{nvc_covariates}{The names of the non-varying coefficient covariates in \code{data}.}
 
 \item{offset}{The name of the offset variable in \code{data}.}
+
+\item{weight}{The name of the weight variable in \code{data}.}
 
 \item{add_intercept}{Whether to add an intercept to the model.}
 
