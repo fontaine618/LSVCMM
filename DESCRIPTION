@@ -3,9 +3,9 @@ Type: Package
 Title: Locally Sparse Varying Coefficients Mixed Model
 Version: 0.0.3
 Date: 2023-10-02
-Maintainer: Simon Fontaine <simfont@umich.edu>
+Maintainer: Redacted Redacted <redacted@redacted.com>
 Description: Implements a locally sparse varying coefficient mixed model
-  proposed by Fontaine et al. (2023+).
+  proposed by <redacted>.
 License: MIT + file LICENSE
 Imports: 
     dplyr,
@@ -19,10 +19,8 @@ Imports:
     pracma
 LinkingTo: Rcpp, RcppArmadillo, RcppProgress
 Authors@R: 
-    person("Simon", "Fontaine", , "simfont@umich.edu", role = c("aut", "cre"))
+    person("Redacted", "Redacted", , "redacted@redacted.com", role = c("aut", "cre"))
 RoxygenNote: 7.2.3
-URL: https://fontaine618.github.io/LSVCMM
-BugReports: https://github.com/fontaine618/LSVCMM/issues
 Suggests: 
     testthat (>= 3.0.0)
 Config/testthat/edition: 3

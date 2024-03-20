@@ -6,18 +6,10 @@
 \alias{LSVCMM-package}
 \title{LSVCMM: Locally Sparse Varying Coefficients Mixed Model}
 \description{
-Implements a locally sparse varying coefficient mixed model proposed by Fontaine et al. (2023+).
-}
-\seealso{
-Useful links:
-\itemize{
-  \item \url{https://fontaine618.github.io/LSVCMM}
-  \item Report bugs at \url{https://github.com/fontaine618/LSVCMM/issues}
-}
-
+Implements a locally sparse varying coefficient mixed model proposed by <redacted>.
 }
 \author{
-\strong{Maintainer}: Simon Fontaine \email{simfont@umich.edu}
+\strong{Maintainer}: Redacted Redacted \email{redacted@redacted.com}
 
 }
 \keyword{internal}
