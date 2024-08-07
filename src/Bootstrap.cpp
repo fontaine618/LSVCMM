@@ -1,8 +1,8 @@
 #include "RcppArmadillo.h"
 #include "Data.h"
 #include "Kernel.h"
-#include "LinkFunction.cpp"
 #include "Family.h"
+#include "LinkFunction.h"
 #include "WorkingCovariance.h"
 #include "Penalty.h"
 #include "Model.h"
@@ -29,6 +29,7 @@ Rcpp::List LSVCMM_Bootstrap(
     arma::colvec &offset,
     arma::colvec &weight,
     std::string family_name, // FAMILY
+    double family_power,
     std::string link,
     std::string kernel_name, // KERNEL
     arma::rowvec &estimated_time,
@@ -86,13 +87,13 @@ Rcpp::List LSVCMM_Bootstrap(
   Kernel* kernel = Kernel::Create(kernel_name, rescale_boundary, estimated_time);
 
   if(control->verbose) Rcpp::Rcout << "[LSVCMM] Initializing family. family_name=" << family_name << "\n";
-  Gaussian* family = new Gaussian();
+  Family* family = Family::Create(family_name, family_power);
 
   if(control->verbose) Rcpp::Rcout << "[LSVCMM] Initializing link function. link_function=" << link << "\n";
-  Identity* link_function = new Identity();
+  LinkFunction* link_function = LinkFunction::Create(link);
 
   if(control->verbose) Rcpp::Rcout << "[LSVCMM] Initializing penalty. penalty_name=" << penalty_name << "\n";
-  Penalty *penalty = Penalty::Create(penalty_name, 0., alpha, adaptive, scad_a, penalize_intercept);
+  Penalty* penalty = Penalty::Create(penalty_name, 0., alpha, adaptive, scad_a, penalize_intercept);
 
   if(control->verbose) Rcpp::Rcout << "[LSVCMM] Initializing working covariance. working_covariance=" << working_covariance << "\n";
   if(variance_ratio < 0.) variance_ratio = log(data.n);

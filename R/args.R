@@ -1,7 +1,7 @@
 # ==============================================================================
-DEFAULT_FAMILY_ARGS = list(response="gaussian" , link="identity")
-IMPLEMENTED_FAMILIES = c("gaussian")
-IMPLEMENTED_LINKS = c("identity")
+DEFAULT_FAMILY_ARGS = list(response="gaussian" , link="identity", power=1.5)
+IMPLEMENTED_FAMILIES = c("gaussian", "tweedie")
+IMPLEMENTED_LINKS = c("identity", "log")
 
 
 #' Prepare family arguments
@@ -11,8 +11,9 @@ IMPLEMENTED_LINKS = c("identity")
 #' @details
 #' The following arguments are supported:
 #' \describe{
-#'  \item{\code{response}}{The response distribution. Currently, only \code{"gaussian"} is supported.}
-#'  \item{\code{link}}{The link function. Currently, only \code{"identity"} is supported.}
+#'  \item{\code{response}}{The response distribution. Currently, only \code{"gaussian"} and \code{"tweedie"} is supported.}
+#'  \item{\code{link}}{The link function. Currently, only \code{"identity"} and \code{"log"} is supported.}
+#'  \item{\code{power}}{The power of the Tweedie variance; default is 1.5.}
 #'  \item{\code{...}}{Additional arguments. Currently ignored.}
 #' }
 #'
@@ -25,6 +26,7 @@ family_args = function(args){
   for(name in names(out)) if(!is.null(args[[name]])) out[[name]] = args[[name]]
   stopifnot(out[["response"]] %in% IMPLEMENTED_FAMILIES)
   stopifnot(out[["link"]] %in% IMPLEMENTED_LINKS)
+  stopifnot(out[["power"]] >= 0)
   return(out)
 }
 

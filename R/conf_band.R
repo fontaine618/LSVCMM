@@ -3,7 +3,8 @@ confidence_band = function(
     obj,
     level=0.95,
     method=c("quantile"),
-    var=2
+    var=2,
+    pval.method=c("normal", "percentile")
 ){
   if(!("LSVCMM.Boot" %in% class(obj))) stop("obj must be of class LSVCMM.Boot, i.e., the output of a lsvcmm.boot call")
   stopifnot(0<level & level<1)
@@ -17,24 +18,27 @@ confidence_band = function(
   )
 
   prop_in_band = proportion_samples_in_band(out$L, out$U, samples)
-  pval = pointwise_pvalues(samples)
+  pval_normal = pointwise_pvalues(samples, "normal")
+  pval_percentile = pointwise_pvalues(samples, "percentile")
   nvars = length(var)
   nt = dim(samples)[2]
-  pval.adj = matrix(stats::p.adjust(pval, method="BH"), nvars, nt)
+  jpval = joint_pvalue(samples)
   df = lapply(seq_along(var), function(j){
     data.frame(
       L=out$L[j,],
       U=out$U[j,],
       pointwise_confidence=1-2*out$p,
-      estimate=obj$vc[j, ],
+      estimate=obj$vc[var[j], ],
       mean=apply(samples[j,,], 1, mean),
       median=apply(samples[j,,], 1, stats::median),
       prop0=apply(samples[j,,], 1, function(x) mean(x==0)),
       estimated_time=obj$unscaled_time,
       level=prop_in_band,
       excludes_zero=(out$L[j,]>0) | (out$U[j,]<0),
-      pval=pval[j,],
-      pval.adj=pval.adj[j,],
+      pval_normal=pval_normal[j,],
+      pval_percentile=pval_percentile[j,],
+      pval_joint=joint_pvalue(samples[j,,,drop=F]),
+      pval_joint_all=jpval,
       var=var[j]
     )
   }) %>% dplyr::bind_rows()
@@ -48,8 +52,8 @@ quantile_confidence_band = function(samples, level){
   nc = dim(samples)[2] * dim(samples)[1]
   minp = level / (2*nc)
   maxp = level / 2
-  # ps = c(seq(minp, maxp, 1/(B+1)), maxp)
-  ps = pracma::logseq(minp, maxp, 200)
+  ps = rev(c(seq(minp, maxp, 1/(B+1)), maxp))
+  # ps = pracma::logseq(minp, maxp, 200)
   prop = sapply(ps, function(p){
     out = pointwise_quantile_confidence_band(p, samples)
     proportion_samples_in_band(out$L, out$U, samples)
@@ -85,14 +89,54 @@ proportion_samples_in_band = function(L, U, samples){
   return(mean(between))
 }
 
-pointwise_pvalues = function(samples){
+pointwise_pvalues = function(samples, method=c("normal", "percentile")){
+  method = match.arg(method)
+  out = switch(
+    method,
+    "normal"=pointwise_pvalues_normal(samples),
+    "percentile"=pointwise_pvalues_percentile(samples)
+  )
+  return(out)
+}
+
+
+joint_pvalue = function(samples){
+  B = dim(samples)[3]
+  cs = c(1/(B+1), 0.5, 1.)
+  diff = cs[3] - cs[1]
+  while(diff > 1/(100*B)){
+    # print(cs)
+    incl0 = sapply(cs, function(cc){
+      out = pointwise_quantile_confidence_band((1-cc)/2, samples)
+      !any(out$L > 0 | out$U < 0)
+    })
+    # print(incl0)
+    if(!any(incl0)) break
+    firstTrue = which(incl0)[1]
+    mid = (cs[firstTrue]+ cs[firstTrue-1])/2
+    cs = c(cs[firstTrue-1], mid, cs[firstTrue])
+    diff = diff/2
+  }
+  pval = 1-cs[1]
+  pval
+}
+
+pointwise_pvalues_normal = function(samples){
+  m = apply(samples, 1:2, mean)
+  s = apply(samples, 1:2, sd)
+  s = pmax(s, 1e-10) # when s==0, we have m=0, so it does not matter
+  pvalues = 2*pnorm(-abs(m/s))
+  pvalues
+}
+
+pointwise_pvalues_percentile = function(samples){
   B = dim(samples)[3]+1
-  pos = apply(samples, 1:2, function(x) sum(x>0))+1
-  neg = apply(samples, 1:2, function(x) sum(x<0))+1
+  pos = apply(samples, 1:2, function(x) sum(x>0))
+  neg = apply(samples, 1:2, function(x) sum(x<0))
   ppos = 1-pos/B
   pneg = 1-neg/B
-  pval_npm = pmin(2 * pmin(ppos, pneg), 1)
-  return(pval_npm)
+  pvalues = pmin(2 * pmin(ppos, pneg), 1)
+  pvalues
 }
 
 transform_obj = function(obj, mat){

@@ -82,6 +82,7 @@ lsvcmm = function(
     weight=data$weight,
 
     family_name=family$response,
+    family_power=family$power,
     link=family$link,
 
     kernel_name=kernel$name,

@@ -18,8 +18,9 @@ Prepare family arguments
 \details{
 The following arguments are supported:
 \describe{
- \item{\code{response}}{The response distribution. Currently, only \code{"gaussian"} is supported.}
- \item{\code{link}}{The link function. Currently, only \code{"identity"} is supported.}
+ \item{\code{response}}{The response distribution. Currently, only \code{"gaussian"} and \code{"tweedie"} is supported.}
+ \item{\code{link}}{The link function. Currently, only \code{"identity"} and \code{"log"} is supported.}
+ \item{\code{power}}{The power of the Tweedie variance; default is 1.5.}
  \item{\code{...}}{Additional arguments. Currently ignored.}
 }
 

@@ -1,7 +1,7 @@
 #include "RcppArmadillo.h"
 #include "Data.h"
 #include "Kernel.h"
-#include "LinkFunction.cpp"
+#include "LinkFunction.h"
 #include "Family.h"
 #include "WorkingCovariance.h"
 #include "Penalty.h"
@@ -18,8 +18,8 @@ Model::Model(
   arma::rowvec estimated_time,
   Penalty* penalty,
   WorkingCovariance* workingCovariance,
-  Identity* linkFunction,
-  Gaussian* family,
+  LinkFunction* linkFunction,
+  Family* family,
   Kernel* kernel,
   Control* control
 ){
@@ -124,6 +124,7 @@ double Model::quasi_log_likelihood(double quad_term, double logdet_term){
 }
 
 void Model::update_gradients(const Data &data){
+  // TODO check with family
   const auto start = std::chrono::high_resolution_clock::now();
   this->gB.zeros();
   this->ga.zeros();
@@ -252,9 +253,6 @@ arma::mat Model::hessian(const Data &data){
   const auto start = std::chrono::high_resolution_clock::now();
   // assumes mean and precision are updated
 
-  // FIXME: not sure if this is correct for non-identity link?
-  // should there be a second term?
-
   uint dim = data.pu + data.px * this->nt;
   arma::mat H = arma::mat(dim, dim, arma::fill::zeros);
 
@@ -331,13 +329,14 @@ void Model::reset_stepsize(){
 }
 
 double Model::lambda_max(Data &data){
+  // TODO: fix this, now just a workaround for the simulations to work
   const auto start = std::chrono::high_resolution_clock::now();
   this->penalty->lambda = 1e10;
   this->penalty->large_weights(this->B);
   this->fit(data);
   this->logger->reset();
   this->penalty->unit_weights(this->B);
-  double out = this->penalty->lambda_max(this->B, this->gB, 1./this->LB);
+  double out = 10*this->penalty->lambda_max(this->B, this->gB, 1./this->LB);
   this->logger->profiler.add_call("Model.lambda_max", std::chrono::high_resolution_clock::now() - start);
   return out;
 }
@@ -367,7 +366,8 @@ void Model::fit(Data &data){
   );
   double llk_old = llk;
   for(uint round=0; round<this->control->max_rounds; round++){
-    // this->prepare_stepsize(data);
+    // TODO: maybe we need to do this every round?
+    this->prepare_stepsize(data);
     this->reset_stepsize();
     double quad_term_old = quad_term;
     uint mean_iter;

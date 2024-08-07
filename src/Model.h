@@ -1,7 +1,7 @@
 #include "RcppArmadillo.h"
 #include "Data.h"
 #include "Kernel.h"
-#include "LinkFunction.cpp"
+#include "LinkFunction.h"
 #include "Family.h"
 #include "WorkingCovariance.h"
 #include "Penalty.h"
@@ -42,8 +42,8 @@ public:
   Kernel *kernel;
   Penalty *penalty;
   WorkingCovariance *workingCovariance;
-  Identity *linkFunction;
-  Gaussian *family;
+  LinkFunction *linkFunction;
+  Family *family;
   Control *control;
   arma::rowvec estimated_time;
   uint nt;
@@ -56,8 +56,8 @@ public:
     arma::rowvec estimated_time,
     Penalty* penalty,
     WorkingCovariance* workingCovariance,
-    Identity* linkFunction,
-    Gaussian* family,
+    LinkFunction* linkFunction,
+    Family* family,
     Kernel* kernel,
     Control* control
   );

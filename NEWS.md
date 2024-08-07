@@ -1,11 +1,19 @@
+# Current status
+
+- lambda max does not find the best value for new families: 
+
 # To do list
 
 [ ] Improve AR1 estimation (also, check if two-step is fine)
-[ ] Boundary rescaling for all kernels (only gaussian currenlty)
 [ ] Disable profiling (or with a flag)
-[ ] Instead of rescaling, change gradient so it is scaled by the total weight
-  - make sure hessian also is scaled by the same thing
-  - I did a first attempt, but need to check if it is right, I think it might be off a bit (sqrt, etc.)
+[ ] Refactor factories outside of base classes
+[ ] add tweedie power argument
+
+# Version 0.0.4
+
+* Refactored link function into interface; added log link
+* Refactored family into interface; added tweedie
+* New p-value computation
 
 # Version 0.0.3
 

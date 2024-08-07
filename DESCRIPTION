@@ -1,8 +1,8 @@
 Package: LSVCMM
 Type: Package
 Title: Locally Sparse Varying Coefficients Mixed Model
-Version: 0.0.3
-Date: 2023-10-02
+Version: 0.0.4
+Date: 2024-07-28
 Maintainer: Simon Fontaine <simfont@umich.edu>
 Description: Implements a locally sparse varying coefficient mixed model
   proposed by Fontaine et al. (2023+).
@@ -20,7 +20,7 @@ Imports:
 LinkingTo: Rcpp, RcppArmadillo, RcppProgress
 Authors@R: 
     person("Simon", "Fontaine", , "simfont@umich.edu", role = c("aut", "cre"))
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
 URL: https://fontaine618.github.io/LSVCMM
 BugReports: https://github.com/fontaine618/LSVCMM/issues
 Suggests: 

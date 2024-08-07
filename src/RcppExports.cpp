@@ -12,8 +12,8 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // LSVCMM_Bootstrap
-Rcpp::List LSVCMM_Bootstrap(arma::colvec& response, arma::ucolvec& subject, arma::colvec& response_time, arma::mat& vcm_covariates, arma::mat& fixed_covariates, arma::colvec& offset, arma::colvec& weight, std::string family_name, std::string link, std::string kernel_name, arma::rowvec& estimated_time, double kernel_scale, bool rescale_boundary, std::string penalty_name, bool penalize_intercept, double alpha, double scad_a, double adaptive, double lambda, std::string working_covariance, bool estimate_variance_components, double variance_ratio, double correlation, unsigned int max_rounds, unsigned int max_iter, double rel_tol, unsigned int verbose, std::string update_method, double backtracking_fraction, bool two_step_estimation, double stepsize_factor, uint n_samples, bool resample_within_subject);
-RcppExport SEXP _LSVCMM_LSVCMM_Bootstrap(SEXP responseSEXP, SEXP subjectSEXP, SEXP response_timeSEXP, SEXP vcm_covariatesSEXP, SEXP fixed_covariatesSEXP, SEXP offsetSEXP, SEXP weightSEXP, SEXP family_nameSEXP, SEXP linkSEXP, SEXP kernel_nameSEXP, SEXP estimated_timeSEXP, SEXP kernel_scaleSEXP, SEXP rescale_boundarySEXP, SEXP penalty_nameSEXP, SEXP penalize_interceptSEXP, SEXP alphaSEXP, SEXP scad_aSEXP, SEXP adaptiveSEXP, SEXP lambdaSEXP, SEXP working_covarianceSEXP, SEXP estimate_variance_componentsSEXP, SEXP variance_ratioSEXP, SEXP correlationSEXP, SEXP max_roundsSEXP, SEXP max_iterSEXP, SEXP rel_tolSEXP, SEXP verboseSEXP, SEXP update_methodSEXP, SEXP backtracking_fractionSEXP, SEXP two_step_estimationSEXP, SEXP stepsize_factorSEXP, SEXP n_samplesSEXP, SEXP resample_within_subjectSEXP) {
+Rcpp::List LSVCMM_Bootstrap(arma::colvec& response, arma::ucolvec& subject, arma::colvec& response_time, arma::mat& vcm_covariates, arma::mat& fixed_covariates, arma::colvec& offset, arma::colvec& weight, std::string family_name, double family_power, std::string link, std::string kernel_name, arma::rowvec& estimated_time, double kernel_scale, bool rescale_boundary, std::string penalty_name, bool penalize_intercept, double alpha, double scad_a, double adaptive, double lambda, std::string working_covariance, bool estimate_variance_components, double variance_ratio, double correlation, unsigned int max_rounds, unsigned int max_iter, double rel_tol, unsigned int verbose, std::string update_method, double backtracking_fraction, bool two_step_estimation, double stepsize_factor, uint n_samples, bool resample_within_subject);
+RcppExport SEXP _LSVCMM_LSVCMM_Bootstrap(SEXP responseSEXP, SEXP subjectSEXP, SEXP response_timeSEXP, SEXP vcm_covariatesSEXP, SEXP fixed_covariatesSEXP, SEXP offsetSEXP, SEXP weightSEXP, SEXP family_nameSEXP, SEXP family_powerSEXP, SEXP linkSEXP, SEXP kernel_nameSEXP, SEXP estimated_timeSEXP, SEXP kernel_scaleSEXP, SEXP rescale_boundarySEXP, SEXP penalty_nameSEXP, SEXP penalize_interceptSEXP, SEXP alphaSEXP, SEXP scad_aSEXP, SEXP adaptiveSEXP, SEXP lambdaSEXP, SEXP working_covarianceSEXP, SEXP estimate_variance_componentsSEXP, SEXP variance_ratioSEXP, SEXP correlationSEXP, SEXP max_roundsSEXP, SEXP max_iterSEXP, SEXP rel_tolSEXP, SEXP verboseSEXP, SEXP update_methodSEXP, SEXP backtracking_fractionSEXP, SEXP two_step_estimationSEXP, SEXP stepsize_factorSEXP, SEXP n_samplesSEXP, SEXP resample_within_subjectSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -25,6 +25,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::colvec& >::type offset(offsetSEXP);
     Rcpp::traits::input_parameter< arma::colvec& >::type weight(weightSEXP);
     Rcpp::traits::input_parameter< std::string >::type family_name(family_nameSEXP);
+    Rcpp::traits::input_parameter< double >::type family_power(family_powerSEXP);
     Rcpp::traits::input_parameter< std::string >::type link(linkSEXP);
     Rcpp::traits::input_parameter< std::string >::type kernel_name(kernel_nameSEXP);
     Rcpp::traits::input_parameter< arma::rowvec& >::type estimated_time(estimated_timeSEXP);
@@ -50,13 +51,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type stepsize_factor(stepsize_factorSEXP);
     Rcpp::traits::input_parameter< uint >::type n_samples(n_samplesSEXP);
     Rcpp::traits::input_parameter< bool >::type resample_within_subject(resample_within_subjectSEXP);
-    rcpp_result_gen = Rcpp::wrap(LSVCMM_Bootstrap(response, subject, response_time, vcm_covariates, fixed_covariates, offset, weight, family_name, link, kernel_name, estimated_time, kernel_scale, rescale_boundary, penalty_name, penalize_intercept, alpha, scad_a, adaptive, lambda, working_covariance, estimate_variance_components, variance_ratio, correlation, max_rounds, max_iter, rel_tol, verbose, update_method, backtracking_fraction, two_step_estimation, stepsize_factor, n_samples, resample_within_subject));
+    rcpp_result_gen = Rcpp::wrap(LSVCMM_Bootstrap(response, subject, response_time, vcm_covariates, fixed_covariates, offset, weight, family_name, family_power, link, kernel_name, estimated_time, kernel_scale, rescale_boundary, penalty_name, penalize_intercept, alpha, scad_a, adaptive, lambda, working_covariance, estimate_variance_components, variance_ratio, correlation, max_rounds, max_iter, rel_tol, verbose, update_method, backtracking_fraction, two_step_estimation, stepsize_factor, n_samples, resample_within_subject));
     return rcpp_result_gen;
 END_RCPP
 }
 // LSVCMM
-Rcpp::List LSVCMM(arma::colvec& response, arma::ucolvec& subject, arma::colvec& response_time, arma::mat& vcm_covariates, arma::mat& fixed_covariates, arma::colvec& offset, arma::colvec& weight, std::string family_name, std::string link, std::string kernel_name, arma::rowvec& estimated_time, arma::vec& kernel_scale, bool rescale_boundary, unsigned int n_kernel_scale, std::string penalty_name, bool penalize_intercept, double alpha, double scad_a, double adaptive, arma::vec& lambda, double lambda_factor, unsigned int n_lambda, std::string working_covariance, bool estimate_variance_components, double variance_ratio, double correlation, unsigned int max_rounds, unsigned int max_iter, double rel_tol, unsigned int verbose, std::string update_method, double backtracking_fraction, bool two_step_estimation, double stepsize_factor);
-RcppExport SEXP _LSVCMM_LSVCMM(SEXP responseSEXP, SEXP subjectSEXP, SEXP response_timeSEXP, SEXP vcm_covariatesSEXP, SEXP fixed_covariatesSEXP, SEXP offsetSEXP, SEXP weightSEXP, SEXP family_nameSEXP, SEXP linkSEXP, SEXP kernel_nameSEXP, SEXP estimated_timeSEXP, SEXP kernel_scaleSEXP, SEXP rescale_boundarySEXP, SEXP n_kernel_scaleSEXP, SEXP penalty_nameSEXP, SEXP penalize_interceptSEXP, SEXP alphaSEXP, SEXP scad_aSEXP, SEXP adaptiveSEXP, SEXP lambdaSEXP, SEXP lambda_factorSEXP, SEXP n_lambdaSEXP, SEXP working_covarianceSEXP, SEXP estimate_variance_componentsSEXP, SEXP variance_ratioSEXP, SEXP correlationSEXP, SEXP max_roundsSEXP, SEXP max_iterSEXP, SEXP rel_tolSEXP, SEXP verboseSEXP, SEXP update_methodSEXP, SEXP backtracking_fractionSEXP, SEXP two_step_estimationSEXP, SEXP stepsize_factorSEXP) {
+Rcpp::List LSVCMM(arma::colvec& response, arma::ucolvec& subject, arma::colvec& response_time, arma::mat& vcm_covariates, arma::mat& fixed_covariates, arma::colvec& offset, arma::colvec& weight, std::string family_name, double family_power, std::string link, std::string kernel_name, arma::rowvec& estimated_time, arma::vec& kernel_scale, bool rescale_boundary, unsigned int n_kernel_scale, std::string penalty_name, bool penalize_intercept, double alpha, double scad_a, double adaptive, arma::vec& lambda, double lambda_factor, unsigned int n_lambda, std::string working_covariance, bool estimate_variance_components, double variance_ratio, double correlation, unsigned int max_rounds, unsigned int max_iter, double rel_tol, unsigned int verbose, std::string update_method, double backtracking_fraction, bool two_step_estimation, double stepsize_factor);
+RcppExport SEXP _LSVCMM_LSVCMM(SEXP responseSEXP, SEXP subjectSEXP, SEXP response_timeSEXP, SEXP vcm_covariatesSEXP, SEXP fixed_covariatesSEXP, SEXP offsetSEXP, SEXP weightSEXP, SEXP family_nameSEXP, SEXP family_powerSEXP, SEXP linkSEXP, SEXP kernel_nameSEXP, SEXP estimated_timeSEXP, SEXP kernel_scaleSEXP, SEXP rescale_boundarySEXP, SEXP n_kernel_scaleSEXP, SEXP penalty_nameSEXP, SEXP penalize_interceptSEXP, SEXP alphaSEXP, SEXP scad_aSEXP, SEXP adaptiveSEXP, SEXP lambdaSEXP, SEXP lambda_factorSEXP, SEXP n_lambdaSEXP, SEXP working_covarianceSEXP, SEXP estimate_variance_componentsSEXP, SEXP variance_ratioSEXP, SEXP correlationSEXP, SEXP max_roundsSEXP, SEXP max_iterSEXP, SEXP rel_tolSEXP, SEXP verboseSEXP, SEXP update_methodSEXP, SEXP backtracking_fractionSEXP, SEXP two_step_estimationSEXP, SEXP stepsize_factorSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -68,6 +69,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::colvec& >::type offset(offsetSEXP);
     Rcpp::traits::input_parameter< arma::colvec& >::type weight(weightSEXP);
     Rcpp::traits::input_parameter< std::string >::type family_name(family_nameSEXP);
+    Rcpp::traits::input_parameter< double >::type family_power(family_powerSEXP);
     Rcpp::traits::input_parameter< std::string >::type link(linkSEXP);
     Rcpp::traits::input_parameter< std::string >::type kernel_name(kernel_nameSEXP);
     Rcpp::traits::input_parameter< arma::rowvec& >::type estimated_time(estimated_timeSEXP);
@@ -94,14 +96,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type backtracking_fraction(backtracking_fractionSEXP);
     Rcpp::traits::input_parameter< bool >::type two_step_estimation(two_step_estimationSEXP);
     Rcpp::traits::input_parameter< double >::type stepsize_factor(stepsize_factorSEXP);
-    rcpp_result_gen = Rcpp::wrap(LSVCMM(response, subject, response_time, vcm_covariates, fixed_covariates, offset, weight, family_name, link, kernel_name, estimated_time, kernel_scale, rescale_boundary, n_kernel_scale, penalty_name, penalize_intercept, alpha, scad_a, adaptive, lambda, lambda_factor, n_lambda, working_covariance, estimate_variance_components, variance_ratio, correlation, max_rounds, max_iter, rel_tol, verbose, update_method, backtracking_fraction, two_step_estimation, stepsize_factor));
+    rcpp_result_gen = Rcpp::wrap(LSVCMM(response, subject, response_time, vcm_covariates, fixed_covariates, offset, weight, family_name, family_power, link, kernel_name, estimated_time, kernel_scale, rescale_boundary, n_kernel_scale, penalty_name, penalize_intercept, alpha, scad_a, adaptive, lambda, lambda_factor, n_lambda, working_covariance, estimate_variance_components, variance_ratio, correlation, max_rounds, max_iter, rel_tol, verbose, update_method, backtracking_fraction, two_step_estimation, stepsize_factor));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_LSVCMM_LSVCMM_Bootstrap", (DL_FUNC) &_LSVCMM_LSVCMM_Bootstrap, 33},
-    {"_LSVCMM_LSVCMM", (DL_FUNC) &_LSVCMM_LSVCMM, 34},
+    {"_LSVCMM_LSVCMM_Bootstrap", (DL_FUNC) &_LSVCMM_LSVCMM_Bootstrap, 34},
+    {"_LSVCMM_LSVCMM", (DL_FUNC) &_LSVCMM_LSVCMM, 35},
     {NULL, NULL, 0}
 };
 
