@@ -7,7 +7,6 @@
 [ ] Improve AR1 estimation (also, check if two-step is fine)
 [ ] Disable profiling (or with a flag)
 [ ] Refactor factories outside of base classes
-[ ] add tweedie power argument
 
 # Version 0.0.4
 
