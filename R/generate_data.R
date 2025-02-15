@@ -1,4 +1,4 @@
-#' Generate synthetic data
+#' Generate synthetic data (group difference)
 #'
 #' @param n_subjects Number of subjects (default 100). Half of them are in group 0 and the other half in group 1 (on average).
 #' @param n_timepoints Number of time points at which the data is sampled spread regularly on the \eqn{[0,1]} interval (default 11).
@@ -9,7 +9,7 @@
 #' @param effect_size Effect size of the group (default 1).
 #' @param grpdiff_function Group difference function (implemented: "sigmoid" (default), "sine".) Can also be a callable
 #' function, provided evaluation is vectorized.
-#' @param missingness Missing observation mechanism (implemented: "uniform" (default), "sine")
+#' @param missingness Missing observation mechanism (implemented: "uniform" (default), "contiguous", "sqrt", "fixed_uniform")
 #' @param seed Seed for the random number generator (default 1).
 #'
 #' @examples
@@ -184,6 +184,227 @@ generate_synthetic_data = function(
     colnames_wide=list(
       subject="subject_id",
       vc_covariates="group",
+      nvc_covariates=NULL,
+      offset=NULL,
+      response="response",
+      time=paste0("t", t0)
+    )
+  )
+
+  return(instance)
+}
+
+
+
+#' Generate synthetic data (multiple features)
+#'
+#' @param n_subjects Number of subjects (default 100).
+#' @param n_timepoints Number of time points at which the data is sampled spread regularly on the \eqn{[0,1]} interval (default 11).
+#' @param n_features Number of features in addition to the intercept (default 2).
+#' @param feature_type Type of feature (implemented: "binary" (default), "uniform", "normal").
+#' @param prop_observed Proportion of observed time points (default 0.7).
+#' @param observation_variance Variance of the observation error (default 1).
+#' @param random_effect_variance_ratio Ratio of the variance of the random effect to the variance of the observation error (default 1).
+#' @param random_effect_ar1_correlation Correlation between two random effects at two consecutive timepoints (default 0.9).
+#' @param effect_size Effect size of the features (default 1).
+#' @param effect_groupsparsity Proportion of features that have no effect (default 0.5).
+#' @param effect_sparsity Proportion of the domain that has null effect (default 0.5).
+#' @param missingness Missing observation mechanism (implemented: "uniform" (default), "contiguous", "sqrt", "fixed_uniform")
+#' @param seed Seed for the random number generator (default 1).
+#'
+#' @examples
+#' instance = generate_synthetic_data_p()
+#'
+#' @details
+#' The data is generated according to the following model:
+#' \deqn{y_{ij} = \beta_0(t_{ij}) + \sum_{k=1}^{p} \beta_k(t_{ij}) x_{ik} + \theta_{ij} + \epsilon_{ij}}
+#' where \eqn{y_{ij}} is the \eqn{j}th response of subject \eqn{i}, at time \eqn{(t_{ij})},
+#' \eqn{x_{ik}} is the \eqn{k}th feature of subject \eqn{i},
+#' \eqn{\theta_{ij}} is the random effect of subject \eqn{i} at time \eqn{j},
+#' \eqn{\epsilon_{ij}} is the observation error of subject \eqn{i} at time \eqn{j},
+#' \eqn{\beta_0(\cdot)} is the intercept function, and \eqn{\beta_1(\cdot)} is the effect size.
+#' The random effects are generated according to a multivariate normal distribution
+#' with mean 0 and covariance matrix \eqn{\Sigma} such that \eqn{\Sigma_{ij} = r\sigma^2\rho^{|i-j|}}
+#' (\eqn{\rho} defined by \code{random_effect_ar1_correlation} and \eqn{r} by \code{random_effect_variance_ratio}).
+#' The observation errors are generated according to a multivariate normal distribution
+#' with mean 0 and covariance matrix \eqn{\sigma^2 I}
+#' (\eqn{\sigma^2} defined by \code{observation_variance}).
+#' The random effects and observation errors are independent.
+#' The observations are then sampled uniformly at a proportion \code{prop_observed} of the timepoints.
+#' An imputed version of the data is also provided where the missing values are imputed using
+#' the function [refund::fpca.sc].
+#' The data is returned in three formats:
+#' \describe{
+#' \item{data}{A data frame containing the longitudinal data in long format.}
+#' \item{data_wide}{A data frame containing the longitudinal data in wide format.}
+#' \item{data_wide_imputed}{A data frame containing the longitudinal data in wide format with imputed missing values.}
+#' }
+#'
+#' @return A list containing the following elements:
+#' \describe{
+#' \item{data}{A data frame containing the longitudinal data in long format.}
+#' \item{data_wide}{A data frame containing the longitudinal data in wide format.}
+#' \item{data_wide_imputed}{A data frame containing the longitudinal data in wide format with imputed missing values.}
+#' \item{true_values}{A data frame containing the true values of the fixed effects.}
+#' \item{times}{A vector of timepoints at which the data is sampled.}
+#' \item{colnames}{A list containing the column names of the data frames.}
+#' }
+#'
+#' @export
+#' @importFrom mvtnorm rmvnorm
+#' @importFrom dplyr filter select bind_cols arrange
+#' @importFrom tidyselect starts_with
+#' @importFrom magrittr %>%
+#' @importFrom tidyr pivot_longer
+#' @importFrom refund fpca.sc
+generate_synthetic_data_p = function(
+    n_subjects=100,
+    n_timepoints=11,
+    n_features=2,
+    feature_type="binary",
+    observation_variance=1.,
+    random_effect_variance_ratio=1.,
+    random_effect_ar1_correlation=0.9,
+    effect_size=1,
+    effect_groupsparsity=0.5,
+    effect_sparsity=0.5,
+    prop_observed=0.7,
+    missingness="uniform",
+    seed=1
+){
+  # to get R CMD CHECK to stop whining
+  observed = NULL
+  subject_id = NULL
+
+  t0 = seq(0, n_timepoints-1) / (n_timepoints-1)
+
+  # coefficients
+  set.seed(0) # for generating the regression coefficients
+  f = list()
+  # intercept: 0
+  f0 = function(t) t*0.
+  # features: spike centered at a random timepoint in [0,1]
+  centers = stats::runif(n_features)
+  stdev = (1-effect_sparsity)/6
+  for (i in 1:n_features) {
+    f[[i]] = function(t) exp(-((t-centers[i])^2)/(2*stdev^2)) * (abs(t-centers[i]) < 6*stdev)
+  }
+  b0 = f0(t0)
+  b = matrix(0, n_features, n_timepoints)
+  for (i in 1:n_features) b[i,] = f[[i]](t0)
+  # add group sparsity (turn some off) and add random sign
+  which_sparse = sample(1:n_features, n_features * effect_groupsparsity)
+  groupsparsity = rep(1, n_features)
+  groupsparsity[which_sparse] = 0
+  for (i in 1:n_features) b[i,] = b[i,] * groupsparsity[i] * sample(c(-1,1), 1) * effect_size
+
+  # features
+  set.seed(seed)
+  Xmat = matrix(0, n_subjects, n_features)
+  if(feature_type=="binary"){
+    for (i in 1:n_features) Xmat[,i] = stats::rbinom(n_subjects, 1, 0.5)
+  }
+  if(feature_type=="continuous"){
+    for (i in 1:n_features) Xmat[,i] = stats::rnorm(n_subjects)
+  }
+
+  # mean
+  timemat = matrix(t0, n_subjects, n_timepoints, byrow=T) # NxT
+  meanmat = f0(timemat) # NxT
+  meanmat = meanmat + Xmat %*% b # NxT
+
+  # random effect
+  corr = random_effect_ar1_correlation^(t0)
+  corrmat = stats::toeplitz(corr)
+  thetamat = mvtnorm::rmvnorm(n_subjects, sigma=corrmat) * sqrt(random_effect_variance_ratio) * sqrt(observation_variance)
+
+  # observations
+  errormat = matrix(stats::rnorm(n_timepoints*n_subjects), n_subjects, n_timepoints) * sqrt(observation_variance)
+  ymat = meanmat + thetamat + errormat
+  smat = matrix(seq(n_subjects), n_subjects, n_timepoints)
+
+  # missing data
+  if(missingness=="uniform") omat = matrix(stats::runif(n_timepoints*n_subjects) < prop_observed, n_subjects, n_timepoints)
+  if(missingness=="contiguous"){
+    n_missing = stats::rbinom(n_subjects, n_timepoints, 1-prop_observed)
+    starting = sapply(n_missing, function(x) sample(1:(n_timepoints-x+1), 1))
+    ending = starting + n_missing - 1
+    omat = matrix(T, n_subjects, n_timepoints)
+    for (i in 1:n_subjects) if(n_missing[i]>0) omat[i, starting[i]:ending[i]] = F
+  }
+  if(missingness=="sqrt"){
+    obs_t = sample.int( n_timepoints, round(n_timepoints*sqrt(1-prop_observed)),F)
+    obs_s = sample.int( n_subjects, round(n_subjects*sqrt(1-prop_observed)),F)
+    omat = matrix(T, n_subjects, n_timepoints)
+    omat[obs_s, obs_t] = F
+  }
+  if(missingness=="fixed_uniform"){
+    n_obs = round(n_timepoints*prop_observed)
+    omat = matrix(F, n_subjects, n_timepoints)
+    for (i in 1:n_subjects) omat[i, sample.int(n_timepoints, n_obs)] = T
+  }
+
+  data_full = data.frame(
+    response=as.vector(ymat),
+    time=as.vector(timemat),
+    subject_id=as.vector(smat),
+    observed=as.vector(omat)
+  )
+  for(i in 1:n_features) data_full[[paste0("X", i)]] = Xmat[,i]
+  data_long = data_full %>% dplyr::filter(observed) %>% dplyr::select(-observed)
+
+  ymat[!omat] = NA
+  data_wide = dplyr::bind_cols(
+    seq(n_subjects),
+    data.frame(Xmat),
+    data.frame(ymat)
+  )
+  colnames(data_wide) = c("subject_id", paste0("X", 1:n_features), paste0("t", t0))
+
+  # try to impute with FPCA, if it fails, it reverts to mean imputation
+  impute_mean = T
+  try({
+    Yhat = refund::fpca.sc(Y=Y, argvals=t0, nbasis=4)$Yhat
+    Yhat[!is.na(Y)] = Y[!is.na(Y)]
+    impute_mean = F
+  }, silent=T)
+  # impute row mean
+  if(impute_mean){
+    Ymean = rowMeans(Y, na.rm=T)
+    Yhat = matrix(Ymean, nrow=n_subjects, ncol=n_timepoints, byrow=F)
+    Yhat[!is.na(Y)] = Y[!is.na(Y)]
+  }
+
+  data_wide_imputed = dplyr::bind_cols(
+    data_wide %>% select(subject_id, dplyr::starts_with("X")),
+    data.frame(Yhat)
+  )
+  colnames(data_wide_imputed) = colnames(data_wide)
+
+
+  true_values = data.frame(
+    time=t0,
+    intercept=b0,
+    t(b)
+  )
+
+  instance = list(
+    data=data_long,
+    data_wide=data_wide,
+    data_wide_imputed=data_wide_imputed,
+    true_values=true_values,
+    estimated_time=t0,
+    colnames=list(
+      subject="subject_id",
+      vc_covariates=paste0("X", 1:n_features),
+      nvc_covariates=NULL,
+      offset=NULL,
+      index="time",
+      response="response"
+    ),
+    colnames_wide=list(
+      subject="subject_id",
+      vc_covariates=paste0("X", 1:n_features),
       nvc_covariates=NULL,
       offset=NULL,
       response="response",

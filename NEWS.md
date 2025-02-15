@@ -1,12 +1,12 @@
-# Current status
-
-- lambda max does not find the best value for new families: 
-
 # To do list
 
 [ ] Improve AR1 estimation (also, check if two-step is fine)
 [ ] Disable profiling (or with a flag)
-[ ] Refactor factories outside of base classes
+[ ] Figure out why RMD check fails under windows
+
+# Version 0.0.5
+
+* Added new data generation with multiple covariates
 
 # Version 0.0.4
 

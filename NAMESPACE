@@ -3,6 +3,7 @@
 export(control_args)
 export(family_args)
 export(generate_synthetic_data)
+export(generate_synthetic_data_p)
 export(kernel_args)
 export(lsvcmm)
 export(lsvcmm.boot)

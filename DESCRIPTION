@@ -1,7 +1,7 @@
 Package: LSVCMM
 Type: Package
 Title: Locally Sparse Varying Coefficients Mixed Model
-Version: 0.0.4
+Version: 0.0.5
 Date: 2024-07-28
 Maintainer: Simon Fontaine <simfont@umich.edu>
 Description: Implements a locally sparse varying coefficient mixed model
