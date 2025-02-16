@@ -297,6 +297,7 @@ generate_synthetic_data_p = function(
   groupsparsity = rep(1, n_features)
   groupsparsity[which_sparse] = 0
   for (i in 1:n_features) b[i,] = b[i,] * groupsparsity[i] * sample(c(-1,1), 1) * effect_size
+  b[abs(b)<1e-3] = 0 # clamp small effects to 0
 
   # features
   set.seed(seed)
