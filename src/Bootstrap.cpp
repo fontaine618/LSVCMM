@@ -1,3 +1,4 @@
+#include "uint.h"
 #include "RcppArmadillo.h"
 #include "Data.h"
 #include "Kernel.h"
@@ -10,7 +11,6 @@
 #include "Path.cpp"
 #include "Control.cpp"
 #include "Logger.cpp"
-#include "uint.h"
 
 
 // [[Rcpp::depends(RcppArmadillo)]]
@@ -53,7 +53,7 @@ Rcpp::List LSVCMM_Bootstrap(
     double backtracking_fraction,
     bool two_step_estimation,
     double stepsize_factor,
-    uint n_samples,
+    unsigned int n_samples,
     bool resample_within_subject
 ){
   Control* control = new Control(
