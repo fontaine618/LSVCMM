@@ -6,7 +6,7 @@
 \alias{LSVCMM-package}
 \title{LSVCMM: Locally Sparse Varying Coefficients Mixed Model}
 \description{
-Implements a locally sparse varying coefficient mixed model proposed by Fontaine et al. (2023+).
+Implements a locally sparse varying coefficient mixed model proposed by Fontaine et al. (2025+).
 }
 \seealso{
 Useful links:

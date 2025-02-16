@@ -364,15 +364,15 @@ generate_synthetic_data_p = function(
   # try to impute with FPCA, if it fails, it reverts to mean imputation
   impute_mean = T
   try({
-    Yhat = refund::fpca.sc(Y=Y, argvals=t0, nbasis=4)$Yhat
-    Yhat[!is.na(Y)] = Y[!is.na(Y)]
+    Yhat = refund::fpca.sc(Y=ymat, argvals=t0, nbasis=4)$Yhat
+    Yhat[!is.na(ymat)] = ymat[!is.na(ymat)]
     impute_mean = F
   }, silent=T)
   # impute row mean
   if(impute_mean){
-    Ymean = rowMeans(Y, na.rm=T)
+    Ymean = rowMeans(ymat, na.rm=T)
     Yhat = matrix(Ymean, nrow=n_subjects, ncol=n_timepoints, byrow=F)
-    Yhat[!is.na(Y)] = Y[!is.na(Y)]
+    Yhat[!is.na(ymat)] = ymat[!is.na(ymat)]
   }
 
   data_wide_imputed = dplyr::bind_cols(
