@@ -286,6 +286,7 @@ generate_synthetic_data_p = function(
   # features: spike centered at a random timepoint in [0,1]
   centers = stats::runif(n_features)
   stdev = (1-effect_sparsity)/6
+  if(effect_size < 0) stdev = - effect_size
   for (i in 1:n_features) {
     f[[i]] = function(t) exp(-((t-centers[i])^2)/(2*stdev^2)) * (abs(t-centers[i]) < 6*stdev)
   }
