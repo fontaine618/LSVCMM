@@ -50,10 +50,9 @@ confidence_band = function(
 quantile_confidence_band = function(samples, level){
   B = dim(samples)[3]
   nc = dim(samples)[2] * dim(samples)[1]
-  minp = level / (2*nc)
+  minp = level / (2*(nc+1))
   maxp = level / 2
   ps = rev(c(seq(minp, maxp, 1/(B+1)), maxp))
-  # ps = pracma::logseq(minp, maxp, 200)
   prop = sapply(ps, function(p){
     out = pointwise_quantile_confidence_band(p, samples)
     proportion_samples_in_band(out$L, out$U, samples)

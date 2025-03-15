@@ -128,7 +128,7 @@ IMPLEMENTED_WORKING_COVARIANCES = c("compound_symmetry", "autoregressive", "inde
 #' \item{\code{name}}{The working covariance function. Currently, only \code{"compound_symmetry"} is supported.}
 #' \item{\code{estimate}}{Whether to estimate the parameters. Must be \code{TRUE} (default) or \code{FALSE}.}
 #' \item{\code{ratio}}{The ratio of the variance of the random effects to the variance of the error term.
-#' If negative (default), the ratio is estimated to `log(n)`.}
+#' If negative, the ratio is estimated to `log(n)`.}
 #' \item{\code{correlation}}{The correlation for AR(1).}
 #' }
 #'
@@ -143,7 +143,8 @@ working_covariance_args = function(args){
 
 # ==============================================================================
 DEFAULT_CONTROL_ARGS = list(max_rounds=50, max_iter=1000, rel_tol=1e-6, verbose=1, update_method="PGD",
-                            backtracking_fraction=0.9, two_step=T, stepsize_factor=1.)
+                            backtracking_fraction=0.9, two_step=T, stepsize_factor=1., lambda_max_factor=10,
+                            update_stepsize_every_round=T)
 
 #' Prepare control arguments
 #'
@@ -175,7 +176,9 @@ control_args = function(args){
   stopifnot(out[["update_method"]] %in% c("PGD", "APGD"))
   stopifnot(out[["backtracking_fraction"]] > 0 & out[["backtracking_fraction"]] < 1)
   stopifnot(out[["stepsize_factor"]] > 0)
+  stopifnot(out[["lambda_max_factor"]] > 0)
   stopifnot(is.logical(out[["two_step"]]))
+  stopifnot(is.logical(out[["update_stepsize_every_round"]]))
   return(out)
 }
 

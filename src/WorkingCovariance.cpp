@@ -44,7 +44,7 @@ double WorkingCovariance::profile_likelihood(
 Independent::Independent(){
   this->variance_ratio = 0.0;
   this->correlation = 0.0;
-  this->estimate_parameters = FALSE;
+  this->estimate_parameters = false;
 }
 
 arma::mat Independent::compute_precision(const arma::colvec &time){
@@ -293,19 +293,20 @@ uint Autoregressive::update_parameters(
   std::vector<arma::mat> Ptmp = P;
   std::vector<arma::mat> abs_diff = this->abs_differences(t);
   uint iter;
-  for(iter=0; iter<control->max_iter; iter++){
+  // for(iter=0; iter<control->max_iter; iter++){
+  for(iter=0; iter<100; iter++){
 
     // update correlation
-    d = this->derivatives_correlation(sr, abs_diff, Ptmp, dispersion);
-    double c = this->correlation;
-    if(d[1] > 0.){
-      this->correlation = (d[0] > 0.) ? 0.5+c/2. : c/2.;
-    }else{
-      c -= d[0] / d[1];
-    }
-    this->correlation = fmin(fmax(c, 1e-2), 1.-1e-2);
-    Ptmp = this->compute_precision(abs_diff);
-    Rcpp::Rcout << "corr=" << this->correlation << " d2=" << d[1] << " d1=" << d[0] << "\n";
+    // d = this->derivatives_correlation(sr, abs_diff, Ptmp, dispersion);
+    // double c = this->correlation;
+    // if(d[1] > 0.){
+    //   c *= (d[0] > 0.) ? (1/0.9) : 0.9;
+    // }else{
+    //   c -= d[0] / d[1];
+    // }
+    // this->correlation = fmin(fmax(c, 1e-3), 1.-1e-3);
+    // Ptmp = this->compute_precision(abs_diff);
+    // Rcpp::Rcout << "corr=" << this->correlation << " d2=" << d[1] << " d1=" << d[0] << "\n";
 
     // update variance ratio
     d = this->derivatives_variance_ratio(sr, abs_diff, Ptmp, dispersion);
@@ -313,13 +314,16 @@ uint Autoregressive::update_parameters(
     if(d[1] > 0.){
       r *= (d[0] > 0.) ? 2. : 0.5;
     }else{
+      // double step = r*r*d[1] + d[0]*r;
+      // step = -r*d[0] / step;
+      // r *= exp(step);
       r -= d[0] / d[1];
     }
-    // this->variance_ratio = fmax(r, 1e-6);
-    Rcpp::Rcout << "ratio=" << this->variance_ratio << " d2=" << d[1] << " d1=" << d[0] << "\n";
+    this->variance_ratio = fmax(r, 1e-6);
+    // Rcpp::Rcout << "ratio=" << this->variance_ratio << " d2=" << d[1] << " d1=" << d[0] << "\n";
 
     // check convergence
-    d = this->derivatives_variance_ratio(sr, abs_diff, Ptmp, dispersion);
+    Ptmp = this->compute_precision(abs_diff);
     pllk = this->profile_likelihood(sr, Ptmp, dispersion);
     logger->add_variance_iteration_results(round, iter, pllk);
     if(control->verbose > 2) Rcpp::Rcout << "          " << round <<".V." << iter <<

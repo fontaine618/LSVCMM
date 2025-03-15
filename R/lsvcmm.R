@@ -112,7 +112,9 @@ lsvcmm = function(
     update_method=control$update_method,
     backtracking_fraction=control$backtracking_fraction,
     two_step_estimation=control$two_step,
-    stepsize_factor=control$stepsize_factor
+    lambda_max_factor=control$lambda_max_factor,
+    stepsize_factor=control$stepsize_factor,
+    update_stepsize_every_round=control$update_stepsize_every_round
   )
   fit = lapply(fit, function(model){
     class(model) = "LSVCMM"

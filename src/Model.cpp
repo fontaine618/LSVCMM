@@ -336,7 +336,7 @@ double Model::lambda_max(Data &data){
   this->fit(data);
   this->logger->reset();
   this->penalty->unit_weights(this->B);
-  double out = 10*this->penalty->lambda_max(this->B, this->gB, 1./this->LB);
+  double out = this->control->lambda_max_factor*this->penalty->lambda_max(this->B, this->gB, 1./this->LB);
   this->logger->profiler.add_call("Model.lambda_max", std::chrono::high_resolution_clock::now() - start);
   return out;
 }
@@ -366,8 +366,7 @@ void Model::fit(Data &data){
   );
   double llk_old = llk;
   for(uint round=0; round<this->control->max_rounds; round++){
-    // TODO: maybe we need to do this every round?
-    this->prepare_stepsize(data);
+    if(control->update_stepsize_every_round) this->prepare_stepsize(data);
     this->reset_stepsize();
     double quad_term_old = quad_term;
     uint mean_iter;

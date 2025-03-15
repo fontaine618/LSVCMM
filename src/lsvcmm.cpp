@@ -50,7 +50,9 @@ Rcpp::List LSVCMM(
     std::string update_method,
     double backtracking_fraction,
     bool two_step_estimation,
-    double stepsize_factor
+    double lambda_max_factor,
+    double stepsize_factor,
+    bool update_stepsize_every_round
 ){
   Control* control = new Control(
     max_rounds,
@@ -60,7 +62,9 @@ Rcpp::List LSVCMM(
     update_method,
     backtracking_fraction,
     two_step_estimation,
-    stepsize_factor
+    lambda_max_factor,
+    stepsize_factor,
+    update_stepsize_every_round
   );
 
   if(control->verbose) Rcpp::Rcout << "[LSVCMM] Initializing data \n";

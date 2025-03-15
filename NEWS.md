@@ -1,12 +1,12 @@
 # To do list
 
-[ ] Improve AR1 estimation (also, check if two-step is fine)
 [ ] Disable profiling (or with a flag)
 
 # Version 0.0.5
 
 * Added new data generation with multiple covariates
 * fixed R CMD CHECK for windows
+* Small fix to confidence bands
 
 # Version 0.0.4
 

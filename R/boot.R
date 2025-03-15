@@ -104,6 +104,7 @@ lsvcmm.boot = function(
     backtracking_fraction=control$backtracking_fraction,
     two_step_estimation=control$two_step,
     stepsize_factor=control$stepsize_factor,
+    update_stepsize_every_round=control$update_stepsize_every_round,
 
     n_samples=n_samples,
     resample_within_subject=resample_within_subject
