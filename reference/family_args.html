@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">LSVCMM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -29,7 +29,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Prepare family arguments</h1>
-      <small class="dont-index">Source: <a href="https://github.com/fontaine618/LSVCMM/blob/v0.0.3/R/args.R" class="external-link"><code>R/args.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/fontaine618/LSVCMM/blob/master/R/args.R" class="external-link"><code>R/args.R</code></a></small>
       <div class="d-none name"><code>family_args.Rd</code></div>
     </div>
 
@@ -57,10 +57,13 @@
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The following arguments are supported:</p><dl><dt><code>response</code></dt>
-<dd><p>The response distribution. Currently, only <code>"gaussian"</code> is supported.</p></dd>
+<dd><p>The response distribution. Currently, only <code>"gaussian"</code> and <code>"tweedie"</code> is supported.</p></dd>
 
  <dt><code>link</code></dt>
-<dd><p>The link function. Currently, only <code>"identity"</code> is supported.</p></dd>
+<dd><p>The link function. Currently, only <code>"identity"</code> and <code>"log"</code> is supported.</p></dd>
+
+ <dt><code>power</code></dt>
+<dd><p>The power of the Tweedie variance; default is 1.5.</p></dd>
 
  <dt><code>...</code></dt>
 <dd><p>Additional arguments. Currently ignored.</p></dd>

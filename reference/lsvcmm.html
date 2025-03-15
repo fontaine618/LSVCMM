@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">LSVCMM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -29,7 +29,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Locally Sparse Varying Coefficient Mixed Models</h1>
-      <small class="dont-index">Source: <a href="https://github.com/fontaine618/LSVCMM/blob/v0.0.3/R/lsvcmm.R" class="external-link"><code>R/lsvcmm.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/fontaine618/LSVCMM/blob/master/R/lsvcmm.R" class="external-link"><code>R/lsvcmm.R</code></a></small>
       <div class="d-none name"><code>lsvcmm.Rd</code></div>
     </div>
 
@@ -47,6 +47,7 @@
 <span>  vc_covariates <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  nvc_covariates <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  offset <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  weight <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  add_intercept <span class="op">=</span> <span class="cn">T</span>,</span>
 <span>  estimated_time <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  family <span class="op">=</span> <span class="va">DEFAULT_FAMILY_ARGS</span>,</span>
@@ -88,6 +89,10 @@
 
 <dt id="arg-offset">offset<a class="anchor" aria-label="anchor" href="#arg-offset"></a></dt>
 <dd><p>The name of the offset variable in <code>data</code>.</p></dd>
+
+
+<dt id="arg-weight">weight<a class="anchor" aria-label="anchor" href="#arg-weight"></a></dt>
+<dd><p>The name of the weight variable in <code>data</code>.</p></dd>
 
 
 <dt id="arg-add-intercept">add_intercept<a class="anchor" aria-label="anchor" href="#arg-add-intercept"></a></dt>

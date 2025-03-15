@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">LSVCMM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -29,7 +29,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Title</h1>
-      <small class="dont-index">Source: <a href="https://github.com/fontaine618/LSVCMM/blob/v0.0.3/R/boot.R" class="external-link"><code>R/boot.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/fontaine618/LSVCMM/blob/master/R/boot.R" class="external-link"><code>R/boot.R</code></a></small>
       <div class="d-none name"><code>lsvcmm.boot.Rd</code></div>
     </div>
 
@@ -47,6 +47,7 @@
 <span>  vc_covariates <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  nvc_covariates <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  offset <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  weight <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  add_intercept <span class="op">=</span> <span class="cn">T</span>,</span>
 <span>  estimated_time <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  family <span class="op">=</span> <span class="va">DEFAULT_FAMILY_ARGS</span>,</span>
@@ -54,7 +55,8 @@
 <span>  penalty <span class="op">=</span> <span class="va">DEFAULT_PENALTY_ARGS</span>,</span>
 <span>  working_covariance <span class="op">=</span> <span class="va">DEFAULT_WORKING_COVARIANCE_ARGS</span>,</span>
 <span>  control <span class="op">=</span> <span class="va">DEFAULT_CONTROL_ARGS</span>,</span>
-<span>  n_samples <span class="op">=</span> <span class="fl">1000</span></span>
+<span>  n_samples <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>  resample_within_subject <span class="op">=</span> <span class="cn">F</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -62,8 +64,118 @@
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg-n-samples">n_samples<a class="anchor" aria-label="anchor" href="#arg-n-samples"></a></dt>
-<dd></dd>
+<dl><dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
+<dd><p>A data frame containing the variables in the model.</p></dd>
+
+
+<dt id="arg-response">response<a class="anchor" aria-label="anchor" href="#arg-response"></a></dt>
+<dd><p>The name of the response variable in <code>data</code>.</p></dd>
+
+
+<dt id="arg-subject">subject<a class="anchor" aria-label="anchor" href="#arg-subject"></a></dt>
+<dd><p>The name of the subject variable in <code>data</code>.</p></dd>
+
+
+<dt id="arg-time">time<a class="anchor" aria-label="anchor" href="#arg-time"></a></dt>
+<dd><p>The name of the time variable in <code>data</code>.</p></dd>
+
+
+<dt id="arg-vc-covariates">vc_covariates<a class="anchor" aria-label="anchor" href="#arg-vc-covariates"></a></dt>
+<dd><p>The names of the varying coefficient covariates in <code>data</code>.</p></dd>
+
+
+<dt id="arg-nvc-covariates">nvc_covariates<a class="anchor" aria-label="anchor" href="#arg-nvc-covariates"></a></dt>
+<dd><p>The names of the non-varying coefficient covariates in <code>data</code>.</p></dd>
+
+
+<dt id="arg-offset">offset<a class="anchor" aria-label="anchor" href="#arg-offset"></a></dt>
+<dd><p>The name of the offset variable in <code>data</code>.</p></dd>
+
+
+<dt id="arg-weight">weight<a class="anchor" aria-label="anchor" href="#arg-weight"></a></dt>
+<dd><p>The name of the weight variable in <code>data</code>.</p></dd>
+
+
+<dt id="arg-add-intercept">add_intercept<a class="anchor" aria-label="anchor" href="#arg-add-intercept"></a></dt>
+<dd><p>Whether to add an intercept to the model.</p></dd>
+
+
+<dt id="arg-estimated-time">estimated_time<a class="anchor" aria-label="anchor" href="#arg-estimated-time"></a></dt>
+<dd><p>The time points at which to estimate the varying coefficients. If missing, all observed time points are used.</p></dd>
+
+
+<dt id="arg-family">family<a class="anchor" aria-label="anchor" href="#arg-family"></a></dt>
+<dd><p>A list of arguments for the response distribution. See <code><a href="family_args.html">family_args</a></code>.</p></dd>
+
+
+<dt id="arg-kernel">kernel<a class="anchor" aria-label="anchor" href="#arg-kernel"></a></dt>
+<dd><p>A list of arguments for the kernel. See <code><a href="kernel_args.html">kernel_args</a></code>.</p></dd>
+
+
+<dt id="arg-penalty">penalty<a class="anchor" aria-label="anchor" href="#arg-penalty"></a></dt>
+<dd><p>A list of arguments for the penalty. See <code><a href="penalty_args.html">penalty_args</a></code>.</p></dd>
+
+
+<dt id="arg-working-covariance">working_covariance<a class="anchor" aria-label="anchor" href="#arg-working-covariance"></a></dt>
+<dd><p>A list of arguments for the working covariance. See <code><a href="working_covariance_args.html">working_covariance_args</a></code>.</p></dd>
+
+
+<dt id="arg-control">control<a class="anchor" aria-label="anchor" href="#arg-control"></a></dt>
+<dd><p>A list of arguments for the control parameters. See <code><a href="control_args.html">control_args</a></code>.</p></dd>
+
+
+<dt id="arg-n-samples">n_samples<a class="anchor" aria-label="anchor" href="#arg-n-samples"></a></dt>
+<dd><p>Number of bootstrap samples to compute</p></dd>
+
+
+<dt id="arg-resample-within-subject">resample_within_subject<a class="anchor" aria-label="anchor" href="#arg-resample-within-subject"></a></dt>
+<dd><p>Whether to resample within subjects</p></dd>
+
+</dl></div>
+    <div class="section level2">
+    <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    <p>A list containing the following elements:</p><dl><dt>family</dt>
+<dd><p>A list of arguments for the response distribution. See <code><a href="family_args.html">family_args</a></code>.</p></dd>
+
+<dt>kernel</dt>
+<dd><p>A list of arguments for the kernel. See <code><a href="kernel_args.html">kernel_args</a></code>.</p></dd>
+
+<dt>penalty</dt>
+<dd><p>A list of arguments for the penalty. See <code><a href="penalty_args.html">penalty_args</a></code>.</p></dd>
+
+<dt>working_covariance</dt>
+<dd><p>A list of arguments for the working covariance. See <code><a href="working_covariance_args.html">working_covariance_args</a></code>.</p></dd>
+
+<dt>control</dt>
+<dd><p>A list of arguments for the control parameters. See <code><a href="control_args.html">control_args</a></code>.</p></dd>
+
+<dt>results</dt>
+<dd><p>A data frame containing the results of the optimization. Each row is a model resulting from a particular tuning parameter combination.</p></dd>
+
+<dt>nvc_boot</dt>
+<dd><p>A matrix containing the estimated non-varying coefficient path of dimension (<code>p_u</code>, <code>n_samples</code>).</p></dd>
+
+<dt>vc_boot</dt>
+<dd><p>An array containing the estimated varying coefficient path of dimension (<code>p_x</code>, <code>n_timepoints</code>, <code>n_samples</code>).</p></dd>
+
+<dt>scaled_time</dt>
+<dd><p>The time points at which the varying coefficients were estimated.</p></dd>
+
+<dt>unscaled_time</dt>
+<dd><p>The corresponding values in the original scale.</p></dd>
+
+<dt>range_time</dt>
+<dd><p>The range of the time points.</p></dd>
+
+<dt>full_model</dt>
+<dd><p>The model fitted on all data.</p></dd>
+
+<dt>nvc</dt>
+<dd><p>A vector containing the estimated non-varying coefficient.</p></dd>
+
+<dt>vc</dt>
+<dd><p>An matrix containing the estimated varying coefficient.</p></dd>
+
 
 </dl></div>
 
